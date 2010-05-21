@@ -1,5 +1,5 @@
 /***********************************************************************
-CurvilinearGridRenderer - Helper class to render curvilinear grids.
+GocadGridRenderer - Helper class to render curvilinear grids.
 Copyright (c) 2009 Oliver Kreylos
 
 This file is part of the 3D Data Visualizer (Visualizer).
@@ -19,9 +19,9 @@ with the 3D Data Visualizer; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ***********************************************************************/
 
-#define VISUALIZATION_TEMPLATIZED_CURVILINEARGRIDRENDERER_IMPLEMENTATION
+#define VISUALIZATION_TEMPLATIZED_GOCADGRIDRENDERER_IMPLEMENTATION
 
-#include <Templatized/CurvilinearGridRenderer.h>
+#include <Templatized/GocadGridRenderer.h>
 
 #include <Misc/ThrowStdErr.h>
 #include <GL/gl.h>
@@ -31,7 +31,7 @@ namespace Visualization {
 
 namespace Templatized {
 
-namespace CurvilinearGridRendererImplementation {
+namespace GocadGridRendererImplementation {
 
 /*************************************************************************
 Internal helper class to render curvilinear grids of different dimensions:
@@ -158,141 +158,37 @@ class GridRenderer<3,DataSetParam>
 		glVertex(box.getVertex(6));
 		glEnd();
 		}
-	inline static void renderGridLine(const DataSet* dataSet,const Index& startIndex,int axis)
-		{
-		/* Render grid line: */
-		glBegin(GL_LINE_STRIP);
-		Index index=startIndex;
-		for(index[axis]=0;index[axis]<dataSet->getNumVertices()[axis];++index[axis])
-			glVertex(dataSet->getVertexPosition(index));
-		glEnd();
-		}
-	inline static void renderPoint(const DataSet* dataSet,const Index& startIndex,int axis)
+	inline static void renderVox(const DataSet* dataSet,const Index& startIndex,int axis)
 		{
 		/* Render point: */
       //glColor3f(0.75f, 0.25f, 0.75f); 
       glPointSize(2.5f);
-		glBegin(GL_POINTS);
 		Index index=startIndex;
 		for(index[axis]=0;index[axis]<dataSet->getNumVertices()[axis];++index[axis])
-			glVertex(dataSet->getVertexPosition(index));
-		glEnd();
+          {   /*glVertex(dataSet->getVertexPosition(index)[0],dataSet->getVertexPosition(index)[1],dataSet->getVertexPosition(index)[2]);*/
+	           glBegin(GL_LINE_STRIP);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]+200);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]+200);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]+200);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]+200);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]+200);
+              glEnd();
+              glBegin(GL_LINES);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]-200,dataSet->getVertexPosition(index)[2]+200);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]+200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]+200);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]-200);
+              glVertex(dataSet->getVertexPosition(index)[0]-200,dataSet->getVertexPosition(index)[1]+200,dataSet->getVertexPosition(index)[2]+200);
+		        glEnd();
+          }
 		}
-	inline static void renderGridOutline(const DataSet* dataSet)
-		{
-		const Index& numVertices=dataSet->getNumVertices();
-		
-		/* Render grid outlines: */
-		Index index(0,0,0);
-		renderGridLine(dataSet,index,0);
-		index[1]=numVertices[1]-1;
-		renderGridLine(dataSet,index,0);
-		index[2]=numVertices[2]-1;
-		renderGridLine(dataSet,index,0);
-		index[1]=0;
-		renderGridLine(dataSet,index,0);
-		
-		index[2]=0;
-		renderGridLine(dataSet,index,1);
-		index[0]=numVertices[0]-1;
-		renderGridLine(dataSet,index,1);
-		index[2]=numVertices[2]-1;
-		renderGridLine(dataSet,index,1);
-		index[0]=0;
-		renderGridLine(dataSet,index,1);
-		
-		index[2]=0;
-		renderGridLine(dataSet,index,2);
-		index[0]=numVertices[0]-1;
-		renderGridLine(dataSet,index,2);
-		index[1]=numVertices[1]-1;
-		renderGridLine(dataSet,index,2);
-		index[0]=0;
-		renderGridLine(dataSet,index,2);
-		}
-	inline static void renderGridFaces(const DataSet* dataSet)
-		{
-		const Index& numVertices=dataSet->getNumVertices();
-		Index index;
-		
-		/* Render grid lines in (x,y)-plane: */
-		index[0]=0;
-		for(index[1]=0;index[1]<numVertices[1];++index[1])
-			{
-			index[2]=0;
-			renderGridLine(dataSet,index,0);
-			index[2]=numVertices[2]-1;
-			renderGridLine(dataSet,index,0);
-			}
-		index[1]=0;
-		for(index[0]=0;index[0]<numVertices[0];++index[0])
-			{
-			index[2]=0;
-			renderGridLine(dataSet,index,1);
-			index[2]=numVertices[2]-1;
-			renderGridLine(dataSet,index,1);
-			}
-		
-		/* Render grid lines in (x,z)-plane: */
-		index[0]=0;
-		for(index[2]=0;index[2]<numVertices[2];++index[2])
-			{
-			index[1]=0;
-			renderGridLine(dataSet,index,0);
-			index[1]=numVertices[1]-1;
-			renderGridLine(dataSet,index,0);
-			}
-		index[2]=0;
-		for(index[0]=0;index[0]<numVertices[0];++index[0])
-			{
-			index[1]=0;
-			renderGridLine(dataSet,index,2);
-			index[1]=numVertices[1]-1;
-			renderGridLine(dataSet,index,2);
-			}
-		
-		/* Render grid lines in (y,z)-plane: */
-		index[1]=0;
-		for(index[2]=0;index[2]<numVertices[2];++index[2])
-			{
-			index[0]=0;
-			renderGridLine(dataSet,index,1);
-			index[0]=numVertices[0]-1;
-			renderGridLine(dataSet,index,1);
-			}
-		index[2]=0;
-		for(index[1]=0;index[1]<numVertices[1];++index[1])
-			{
-			index[0]=0;
-			renderGridLine(dataSet,index,2);
-			index[0]=numVertices[0]-1;
-			renderGridLine(dataSet,index,2);
-			}
-		}
-	inline static void renderGridCells(const DataSet* dataSet)
-		{
-		const Index& numVertices=dataSet->getNumVertices();
-		Index index;
-		
-		/* Render grid lines along x-axis: */
-		index[0]=0;
-		for(index[1]=0;index[1]<numVertices[1];++index[1])
-			for(index[2]=0;index[2]<numVertices[2];++index[2])
-				renderGridLine(dataSet,index,0);
-		
-		/* Render grid lines along y-axis: */
-		index[1]=0;
-		for(index[0]=0;index[0]<numVertices[0];++index[0])
-			for(index[2]=0;index[2]<numVertices[2];++index[2])
-				renderGridLine(dataSet,index,1);
-		
-		/* Render grid lines along z-axis: */
-		index[2]=0;
-		for(index[0]=0;index[0]<numVertices[0];++index[0])
-			for(index[1]=0;index[1]<numVertices[1];++index[1])
-				renderGridLine(dataSet,index,2);
-		}
-	inline static void renderPointSet(const DataSet* dataSet)
+	inline static void renderVoxset(const DataSet* dataSet)
 		{
 		const Index& numVertices=dataSet->getNumVertices();
 		Index index;
@@ -301,19 +197,19 @@ class GridRenderer<3,DataSetParam>
 		index[0]=0;
 		for(index[1]=0;index[1]<numVertices[1];++index[1])
 			for(index[2]=0;index[2]<numVertices[2];++index[2])
-				renderPoint(dataSet,index,0);
+				renderVox(dataSet,index,0);
 		
 		/* Render points along y-axis: */
 		index[1]=0;
 		for(index[0]=0;index[0]<numVertices[0];++index[0])
 			for(index[2]=0;index[2]<numVertices[2];++index[2])
-				renderPoint(dataSet,index,1);
+				renderVox(dataSet,index,1);
 		
 		/* Render points along z-axis: */
 		index[2]=0;
 		for(index[0]=0;index[0]<numVertices[0];++index[0])
 			for(index[1]=0;index[1]<numVertices[1];++index[1])
-				renderPoint(dataSet,index,2);
+				renderVox(dataSet,index,2);
 		}
 	inline static void highlightCell(const Cell& cell)
 		{
@@ -339,17 +235,16 @@ class GridRenderer<3,DataSetParam>
 		glEnd();
 		}
 	};
-
 }
 
 /****************************************
-Methods of class CurvilinearGridRenderer:
+Methods of class GocadGridRenderer:
 ****************************************/
 
 template <class DataSetParam>
 inline
-CurvilinearGridRenderer<DataSetParam>::CurvilinearGridRenderer(
-	const typename CurvilinearGridRenderer<DataSetParam>::DataSet* sDataSet)
+GocadGridRenderer<DataSetParam>::GocadGridRenderer(
+	const typename GocadGridRenderer<DataSetParam>::DataSet* sDataSet)
 	:dataSet(sDataSet),
 	 renderingModeIndex(0)
 	{
@@ -358,24 +253,24 @@ CurvilinearGridRenderer<DataSetParam>::CurvilinearGridRenderer(
 template <class DataSetParam>
 inline
 int
-CurvilinearGridRenderer<DataSetParam>::getNumRenderingModes(
+GocadGridRenderer<DataSetParam>::getNumRenderingModes(
 	void)
 	{
-	return 5;
+	return 2;
 	}
 
 template <class DataSetParam>
 inline
 const char*
-CurvilinearGridRenderer<DataSetParam>::getRenderingModeName(
+GocadGridRenderer<DataSetParam>::getRenderingModeName(
 	int renderingModeIndex)
 	{
-	if(renderingModeIndex<0||renderingModeIndex>=5)
-		Misc::throwStdErr("CurvilinearGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
+	if(renderingModeIndex<0||renderingModeIndex>=3)
+		Misc::throwStdErr("GocadGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
 	static const char* renderingModeNames[5]=
 		{
-		"Bounding Box","Grid Outline","Grid Faces","Grid Cells", "Point Set"
+		"Bounding Box", "Voxets"
 		};
 	
 	return renderingModeNames[renderingModeIndex];
@@ -384,11 +279,11 @@ CurvilinearGridRenderer<DataSetParam>::getRenderingModeName(
 template <class DataSetParam>
 inline
 void
-CurvilinearGridRenderer<DataSetParam>::setRenderingMode(
+GocadGridRenderer<DataSetParam>::setRenderingMode(
 	int newRenderingModeIndex)
 	{
-	if(newRenderingModeIndex<0||newRenderingModeIndex>=5)
-		Misc::throwStdErr("CurvilinearGridRenderer::setRenderingMode: invalid rendering mode index %d",newRenderingModeIndex);
+	if(newRenderingModeIndex<0||newRenderingModeIndex>=3)
+		Misc::throwStdErr("GocadGridRenderer::setRenderingMode: invalid rendering mode index %d",newRenderingModeIndex);
 	
 	renderingModeIndex=newRenderingModeIndex;
 	}
@@ -396,34 +291,19 @@ CurvilinearGridRenderer<DataSetParam>::setRenderingMode(
 template <class DataSetParam>
 inline
 void
-CurvilinearGridRenderer<DataSetParam>::glRenderAction(
+GocadGridRenderer<DataSetParam>::glRenderAction(
 	GLContextData& contextData) const
 	{
 	switch(renderingModeIndex)
 		{
 		case 0:
 			/* Render the grid's bounding box: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderBoundingBox(dataSet->getDomainBox());
+			GocadGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderBoundingBox(dataSet->getDomainBox());
 			break;
-			
-		case 1:
-			/* Render the grid's outline: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridOutline(dataSet);
-			break;
-		
-		case 2:
-			/* Render the grid's faces: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridFaces(dataSet);
-			break;
-		
-		case 3:
-			/* Render the grid's cells: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridCells(dataSet);
-         break;
 
-		case 4:
+		case 1:
 			/* Render the grid's cells: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderPointSet(dataSet);
+			GocadGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderVoxset(dataSet);
 			break;
 		}
 	}
@@ -431,12 +311,12 @@ CurvilinearGridRenderer<DataSetParam>::glRenderAction(
 template <class DataSetParam>
 inline
 void
-CurvilinearGridRenderer<DataSetParam>::renderCell(
-	const typename CurvilinearGridRenderer<DataSetParam>::CellID& cellID,
+GocadGridRenderer<DataSetParam>::renderCell(
+	const typename GocadGridRenderer<DataSetParam>::CellID& cellID,
 	GLContextData& contextData) const
 	{
 	/* Highlight the cell: */
-	CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::highlightCell(dataSet->getCell(cellID));
+	GocadGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::highlightCell(dataSet->getCell(cellID));
 	}
 
 }

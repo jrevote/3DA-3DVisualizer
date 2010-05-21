@@ -25,7 +25,7 @@
 # same setting in Vrui's makefile. By default the directories match; if
 # the installation directory was adjusted during Vrui's installation, it
 # must be adjusted here as well.
-VRUIDIR = $(HOME)/Vrui-1.0
+VRUIDIR = /home/jrevote/Documents/Projects/3D-Alive/Development/Builds/Vrui-1.0-068
 
 # Base installation directory for 3D Visualizer and its module
 # plug-ins. The module plug-ins cannot be moved from this location
@@ -36,10 +36,10 @@ VRUIDIR = $(HOME)/Vrui-1.0
 # directories underneath the given base directory, respectively.
 # Important note: Do not use ~ as an abbreviation for the user's home
 # directory here; use $(HOME) instead.
-INSTALLDIR = $(shell pwd)
+INSTALLDIR = /home/jrevote/Documents/Projects/3D-Alive/Development/Builds/3DVisualizer-1.7
 
 # List of default visualization modules:
-MODULE_NAMES = SphericalASCIIFile \
+#MODULE_NAMES = SphericalASCIIFile \
                StructuredGridASCII \
                StructuredGridVTK \
                CitcomCUCartesianRawFile \
@@ -52,7 +52,17 @@ MODULE_NAMES = SphericalASCIIFile \
                StructuredHexahedralTecplotASCIIFile \
                UnstructuredHexahedralTecplotASCIIFile \
                ImageStack \
-               MultiChannelImageStack
+               MultiChannelImageStack \
+               StructuredGocadFile \
+               StructuredCloudFile \
+               SphericalCloudFile \
+               CloudFile
+
+MODULE_NAMES = StructuredGocadFile \
+               StructuredCloudFile \
+               UnstructuredCloudFile \
+               SphericalCloudFile \
+               CloudFile
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them
@@ -130,7 +140,7 @@ CFLAGS += -I.
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(OBJDIR)/$(*D)
 	@echo Compiling $<...
-	@g++ -c -o $@ $(VRUI_CFLAGS) $(CFLAGS) $<
+	@g++ -c -o $@ $(VRUI_CFLAGS) -g2 -O0  $(CFLAGS) $<
 
 # System-default destination directory for dynamic libraries:
 ifeq (`uname -m`,x86_64)

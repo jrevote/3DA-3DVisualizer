@@ -1,5 +1,5 @@
 /***********************************************************************
-CurvilinearGridRenderer - Helper class to render curvilinear grids.
+CloudGridRenderer - Helper class to render curvilinear grids.
 Copyright (c) 2009 Oliver Kreylos
 
 This file is part of the 3D Data Visualizer (Visualizer).
@@ -19,9 +19,9 @@ with the 3D Data Visualizer; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ***********************************************************************/
 
-#define VISUALIZATION_TEMPLATIZED_CURVILINEARGRIDRENDERER_IMPLEMENTATION
+#define VISUALIZATION_TEMPLATIZED_CLOUDGRIDRENDERER_IMPLEMENTATION
 
-#include <Templatized/CurvilinearGridRenderer.h>
+#include <Templatized/CloudGridRenderer.h>
 
 #include <Misc/ThrowStdErr.h>
 #include <GL/gl.h>
@@ -31,7 +31,7 @@ namespace Visualization {
 
 namespace Templatized {
 
-namespace CurvilinearGridRendererImplementation {
+namespace CloudGridRendererImplementation {
 
 /*************************************************************************
 Internal helper class to render curvilinear grids of different dimensions:
@@ -172,11 +172,13 @@ class GridRenderer<3,DataSetParam>
 		/* Render point: */
       //glColor3f(0.75f, 0.25f, 0.75f); 
       glPointSize(2.5f);
-		glBegin(GL_POINTS);
 		Index index=startIndex;
+		glBegin(GL_POINTS);
 		for(index[axis]=0;index[axis]<dataSet->getNumVertices()[axis];++index[axis])
+         {
 			glVertex(dataSet->getVertexPosition(index));
-		glEnd();
+         }
+	   glEnd();
 		}
 	inline static void renderGridOutline(const DataSet* dataSet)
 		{
@@ -343,13 +345,13 @@ class GridRenderer<3,DataSetParam>
 }
 
 /****************************************
-Methods of class CurvilinearGridRenderer:
+Methods of class CloudGridRenderer:
 ****************************************/
 
 template <class DataSetParam>
 inline
-CurvilinearGridRenderer<DataSetParam>::CurvilinearGridRenderer(
-	const typename CurvilinearGridRenderer<DataSetParam>::DataSet* sDataSet)
+CloudGridRenderer<DataSetParam>::CloudGridRenderer(
+	const typename CloudGridRenderer<DataSetParam>::DataSet* sDataSet)
 	:dataSet(sDataSet),
 	 renderingModeIndex(0)
 	{
@@ -358,7 +360,7 @@ CurvilinearGridRenderer<DataSetParam>::CurvilinearGridRenderer(
 template <class DataSetParam>
 inline
 int
-CurvilinearGridRenderer<DataSetParam>::getNumRenderingModes(
+CloudGridRenderer<DataSetParam>::getNumRenderingModes(
 	void)
 	{
 	return 5;
@@ -367,11 +369,11 @@ CurvilinearGridRenderer<DataSetParam>::getNumRenderingModes(
 template <class DataSetParam>
 inline
 const char*
-CurvilinearGridRenderer<DataSetParam>::getRenderingModeName(
+CloudGridRenderer<DataSetParam>::getRenderingModeName(
 	int renderingModeIndex)
 	{
 	if(renderingModeIndex<0||renderingModeIndex>=5)
-		Misc::throwStdErr("CurvilinearGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
+		Misc::throwStdErr("CloudGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
 	static const char* renderingModeNames[5]=
 		{
@@ -384,11 +386,11 @@ CurvilinearGridRenderer<DataSetParam>::getRenderingModeName(
 template <class DataSetParam>
 inline
 void
-CurvilinearGridRenderer<DataSetParam>::setRenderingMode(
+CloudGridRenderer<DataSetParam>::setRenderingMode(
 	int newRenderingModeIndex)
 	{
 	if(newRenderingModeIndex<0||newRenderingModeIndex>=5)
-		Misc::throwStdErr("CurvilinearGridRenderer::setRenderingMode: invalid rendering mode index %d",newRenderingModeIndex);
+		Misc::throwStdErr("CloudGridRenderer::setRenderingMode: invalid rendering mode index %d",newRenderingModeIndex);
 	
 	renderingModeIndex=newRenderingModeIndex;
 	}
@@ -396,34 +398,34 @@ CurvilinearGridRenderer<DataSetParam>::setRenderingMode(
 template <class DataSetParam>
 inline
 void
-CurvilinearGridRenderer<DataSetParam>::glRenderAction(
+CloudGridRenderer<DataSetParam>::glRenderAction(
 	GLContextData& contextData) const
 	{
 	switch(renderingModeIndex)
 		{
 		case 0:
 			/* Render the grid's bounding box: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderBoundingBox(dataSet->getDomainBox());
+			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderBoundingBox(dataSet->getDomainBox());
 			break;
 			
 		case 1:
 			/* Render the grid's outline: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridOutline(dataSet);
+			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridOutline(dataSet);
 			break;
 		
 		case 2:
 			/* Render the grid's faces: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridFaces(dataSet);
+			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridFaces(dataSet);
 			break;
 		
 		case 3:
 			/* Render the grid's cells: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridCells(dataSet);
+			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridCells(dataSet);
          break;
 
 		case 4:
 			/* Render the grid's cells: */
-			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderPointSet(dataSet);
+			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderPointSet(dataSet);
 			break;
 		}
 	}
@@ -431,12 +433,12 @@ CurvilinearGridRenderer<DataSetParam>::glRenderAction(
 template <class DataSetParam>
 inline
 void
-CurvilinearGridRenderer<DataSetParam>::renderCell(
-	const typename CurvilinearGridRenderer<DataSetParam>::CellID& cellID,
+CloudGridRenderer<DataSetParam>::renderCell(
+	const typename CloudGridRenderer<DataSetParam>::CellID& cellID,
 	GLContextData& contextData) const
 	{
 	/* Highlight the cell: */
-	CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::highlightCell(dataSet->getCell(cellID));
+	CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::highlightCell(dataSet->getCell(cellID));
 	}
 
 }

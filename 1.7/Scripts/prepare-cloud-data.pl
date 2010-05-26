@@ -19,6 +19,26 @@ sub read_arguments {
       elsif( $argument =~ m/^\-\-help/ ) { print $help_string; exit }
       elsif( $argument =~ m/^\-input/ ) { $_[2] = $arguments_list[$i+1]; $i++; }
       elsif( $argument =~ m/^\-order/ ) { @{$_[3]} = split(":", $arguments_list[$i+1]); $i++; }
+      elsif( $argument =~ m/^\-scalar/ ) {
+         if( scalar(@arguments_list) >= 6 ) {
+            my @elements = split(",", $arguments_list[$i+1]);
+            my $key;
+            $i++;
+            foreach $key (@elements) {
+               my @container = split(":", $key);
+               if( scalar(@container) == 2 ) {
+                  push @{$_[4]}, $container[0] if $container[0] ne "";
+                  push @{$_[5]}, $container[1] if $container[1] ne "";
+               }
+               else {
+                  die( "\n\nWrong number of scalar:columns provided" );
+               }
+            }
+         }
+         else {
+            die( "\n\nWrong number of scalar:columns provided" );
+         }
+      }
    }
 }
 
@@ -28,31 +48,37 @@ sub pre_process {
  
    To run this script:
 
-   ./prepare-cloud-data.pl -input <cloud ascii file> -order <1st>:<2nd>:<3rd>
+   ./prepare-cloud-data.pl -input <cloud ascii file> -order <1st>:<2nd>:<3rd> -scalar <name>:<column no.>,..
 
    Where:
 
-   <cloud ascii file> : is the 3d cloud ascii input file. This is in column-based order and usually contains
-                        the columns - longitude, latitude, height and attirubutes. Currently, the only attribute
-                        currently supplied in the input files is the 'cloudiness' or cloud fraction for that location.
+   <cloud ascii file>  : is the 3d cloud ascii input file. This is in column-based order and usually contains
+                         the columns - longitude, latitude, height and attirubutes. Currently, the only attribute
+                         currently supplied in the input files is the 'cloudiness' or cloud fraction for that location.
 
-   <1st>:<2nd>:<3rd>  : are colon ':' seperated column arrangements that will be applied to the preprocessed input file.
-                        For example, if the 3rd column is the fastest changing value and the 1st column the slowest-changing
-                        value, then these columns needs to be switched in order for it to be propoerly loaded and visualized.
+   <1st>:<2nd>:<3rd>   : are colon ':' seperated column arrangements that will be applied to the preprocessed input file.
+                         For example, if the 3rd column is the fastest changing value and the 1st column the slowest-changing
+                         value, then these columns needs to be switched in order for it to be propoerly loaded and visualized.
+
+   <name>:<column no.> : specifies the scalar values associated to each location. <name> specifies the name of the scalar
+                         value and <column no.> specifies on which column this scalar can be found. Multiple scalar variables
+                         can be specified via a series of ',' comma separated <name>:<column no.>.
                         
    Example: ./prepare-cloud-data.pl -input cloud_3d.asc -order 3:2:1
    \n";     
    my @counts = (0, 0, 0);
    my @min = (0.0, 0.0, 0.0);
    my @max = (0.0, 0.0, 0.0);
-   my @elements = ((), (), (), ());
+   my @elements = ((), (), ());
    my @seen = ((), (), ());
    my @order = (0, 0, 0);
+   my @scalars;
+   my @columns;
    my $input_file = "";
    my $flag = 0;
    my $i;
 
-   &read_arguments( \@ARGV, $help_string, $input_file, \@order );
+   &read_arguments( \@ARGV, $help_string, $input_file, \@order, \@scalars, \@columns );
 
    for( $i = 0; $i < scalar(@order); $i++ ) {
       $order[$i]--;
@@ -61,22 +87,31 @@ sub pre_process {
    if( $input_file eq "" ) {
       die( "\n\nNo specified input file provided" ); 
    }
+   if( scalar(@scalars) != scalar(@columns) or scalar(@scalars) == 0 or scalar(@columns) == 0 ) {
+      die( "\n\nWrong number of scalar:columns provided" );
+   }
 
+   for( $i = 0; $i < scalar(@scalars); $i++ ) {
+      push @elements, ();
+   }
    open( CLOUD_INPUT, $input_file ) or die;
    while( <CLOUD_INPUT> ) {
       my $count;
       my ($line) = $_;
-      my @container = {0.0,0.0,0.0,0.0};
+      my @container = (0.0,0.0,0.0);
       
       chomp($line);
-      ($container[0], $container[1], $container[2], $container[3]) = split( ' ', $line );
-      push @{$elements[0]}, $container[0];
-      push @{$elements[1]}, $container[1];
-      push @{$elements[2]}, $container[2];
-      push @{$elements[3]}, $container[3];
-      $counts[0] += 1 unless $seen[0]{$container[0]}++;
-      $counts[1] += 1 unless $seen[1]{$container[1]}++;
-      $counts[2] += 1 unless $seen[2]{$container[2]}++;
+
+      for( $i = 0; $i < scalar(@scalars); $i++ ) {
+         push @container, 0.0;
+      }
+      (@container) = split( ' ', $line );
+      for( $i = 0; $i < scalar(@container); $i++ ) {
+         push @{$elements[$i]}, $container[$i];
+      }
+      for( $i = 0; $i < 3; $i++ ) {
+         $counts[$i] += 1 unless $seen[$i]{$container[$i]}++;
+      }
 
       if( $flag == 1 ) {
          for( $count = 0; $count < 3; $count++ ) {
@@ -89,8 +124,10 @@ sub pre_process {
          }
       } 
       else {
-         ($min[0], $min[1], $min[2]) = ($container[0], $container[1], $container[2]);
-         ($max[0], $max[1], $max[2]) = ($container[0], $container[1], $container[2]);
+         for( $i = 0; $i < 3; $i++ ) {
+             $min[$i] = $container[$i];
+             $max[$i] = $container[$i];
+         }
          $flag = 1;
       }
    }
@@ -108,10 +145,14 @@ sub pre_process {
       }
       close( CLOUD_OUTPUT );
 
-      open( SCALAR_OUTPUT, ">$input_file" . ".preprocessed.fraction" );
-      print( SCALAR_OUTPUT "gridsize ". $counts[$order[0]]." ".$counts[$order[1]]." ".scalar($counts[$order[2]])."\n" );
-      print( SCALAR_OUTPUT "scalar fraction\n" );
-      print( SCALAR_OUTPUT join("\n", @{$elements[3]}) ); 
-      close( SCALAR_OUTPUT );
+      if( scalar(@scalars) >= 1 ) {
+         for( $i = 0; $i < scalar(@scalars); $i++ ) {
+            open( SCALAR_OUTPUT, ">$input_file" . ".preprocessed.$scalars[$i]" );
+            print( SCALAR_OUTPUT "gridsize ". $counts[$order[0]]." ".$counts[$order[1]]." ".scalar($counts[$order[2]])."\n" );
+            print( SCALAR_OUTPUT "scalar $scalars[$i]\n" );
+            print( SCALAR_OUTPUT join("\n", @{$elements[$i+3]}) ); 
+            close( SCALAR_OUTPUT );
+         }
+      }
    } 
 }

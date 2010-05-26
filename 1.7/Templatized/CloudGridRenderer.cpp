@@ -170,14 +170,11 @@ class GridRenderer<3,DataSetParam>
 	inline static void renderPoint(const DataSet* dataSet,const Index& startIndex,int axis)
 		{
 		/* Render point: */
-      //glColor3f(0.75f, 0.25f, 0.75f); 
       glPointSize(2.5f);
 		Index index=startIndex;
 		glBegin(GL_POINTS);
 		for(index[axis]=0;index[axis]<dataSet->getNumVertices()[axis];++index[axis])
-         {
 			glVertex(dataSet->getVertexPosition(index));
-         }
 	   glEnd();
 		}
 	inline static void renderGridOutline(const DataSet* dataSet)
@@ -298,10 +295,10 @@ class GridRenderer<3,DataSetParam>
 		{
 		const Index& numVertices=dataSet->getNumVertices();
 		Index index;
-		
+	   
 		/* Render points along x-axis: */
 		index[0]=0;
-		for(index[1]=0;index[1]<numVertices[1];++index[1])
+	   for(index[1]=0;index[1]<numVertices[1];++index[1])
 			for(index[2]=0;index[2]<numVertices[2];++index[2])
 				renderPoint(dataSet,index,0);
 		
@@ -313,6 +310,7 @@ class GridRenderer<3,DataSetParam>
 		
 		/* Render points along z-axis: */
 		index[2]=0;
+      std::cout<<numVertices[0]<<" "<<numVertices[1]<<" "<<numVertices[2]<<"\n"<<std::flush;
 		for(index[0]=0;index[0]<numVertices[0];++index[0])
 			for(index[1]=0;index[1]<numVertices[1];++index[1])
 				renderPoint(dataSet,index,2);

@@ -93,6 +93,9 @@ sub pre_process {
 
    for( $i = 0; $i < scalar(@scalars); $i++ ) {
       push @elements, ();
+      push @min, 0.0;
+      push @max, 0.0;
+      push @order, $columns[$i] - 1;
    }
    open( CLOUD_INPUT, $input_file ) or die;
    while( <CLOUD_INPUT> ) {
@@ -109,12 +112,12 @@ sub pre_process {
       for( $i = 0; $i < scalar(@container); $i++ ) {
          push @{$elements[$i]}, $container[$i];
       }
-      for( $i = 0; $i < 3; $i++ ) {
+      for( $i = 0; $i < 3 + scalar(@scalars); $i++ ) {
          $counts[$i] += 1 unless $seen[$i]{$container[$i]}++;
       }
 
       if( $flag == 1 ) {
-         for( $count = 0; $count < 3; $count++ ) {
+         for( $count = 0; $count < 3 + scalar(@scalars); $count++ ) {
             if( $min[$count] > $container[$count] ) { 
                $min[$count] = $container[$count];
             }
@@ -124,7 +127,7 @@ sub pre_process {
          }
       } 
       else {
-         for( $i = 0; $i < 3; $i++ ) {
+         for( $i = 0; $i < 3 + scalar(@scalars); $i++ ) {
              $min[$i] = $container[$i];
              $max[$i] = $container[$i];
          }
@@ -132,6 +135,9 @@ sub pre_process {
       }
    }
    print "X (".$min[$order[0]]." to ".$max[$order[0]].") Y (".$min[$order[1]]." to ".$max[$order[1]].") Z (".$min[$order[2]]." to ".$max[$order[2]].")\n";
+   for( $i = 0; $i < scalar(@scalars); $i++ ) {
+       print( $scalars[$i]." (".$min[$order[$i+3]]," to ".$max[$order[$i+3]].")\n" );
+   }
     
    if( scalar(@{$elements[0]}) == scalar(@{$elements[1]}) and scalar(@{$elements[1]}) == scalar(@{$elements[2]}) ) {
       open( CLOUD_OUTPUT, ">$input_file" . ".preprocessed" );

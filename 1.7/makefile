@@ -39,7 +39,7 @@ VRUIDIR = /home/jrevote/Documents/Projects/3D-Alive/Development/Builds/Vrui-1.0-
 INSTALLDIR = /home/jrevote/Documents/Projects/3D-Alive/Development/Builds/3DVisualizer-1.7
 
 # List of default visualization modules:
-#MODULE_NAMES = SphericalASCIIFile \
+MODULE_NAMES = SphericalASCIIFile \
                StructuredGridASCII \
                StructuredGridVTK \
                CitcomCUCartesianRawFile \
@@ -58,7 +58,7 @@ INSTALLDIR = /home/jrevote/Documents/Projects/3D-Alive/Development/Builds/3DVisu
                SphericalCloudFile \
                CloudFile
 
-MODULE_NAMES = StructuredGocadFile \
+#MODULE_NAMES = StructuredGocadFile \
                StructuredCloudFile \
                UnstructuredCloudFile \
                SphericalCloudFile \
@@ -89,7 +89,7 @@ UNSUPPORTED_MODULE_NAMES = AnalyzeFile \
 # for some visualization algorithms, especially volume rendering. This
 # flag should only be set to 1 on newer, dedicated 3D graphics cards
 # such as Nvidia's G80 series.
-USE_SHADERS = 0
+USE_SHADERS = 1
 
 # Flag whether to build the 3D Visualizer collaboration module for
 # spatially distributed shared data exploration.

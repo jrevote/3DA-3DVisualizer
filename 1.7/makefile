@@ -56,12 +56,8 @@ MODULE_NAMES = SphericalASCIIFile \
                StructuredGocadFile \
                StructuredCloudFile \
                SphericalCloudFile \
-               CloudFile
-
-#MODULE_NAMES = StructuredGocadFile \
-               StructuredCloudFile \
-               UnstructuredCloudFile \
-               SphericalCloudFile \
+               XDMFFile \
+               FITSFile \
                CloudFile
 
 # List of other available modules:
@@ -135,6 +131,8 @@ endif
 
 # Add base directory to include path:
 CFLAGS += -I.
+
+CFLAGS += -I/usr/local/packages/xdmf-gcc-4.4.1/include
 
 # Pattern rule to compile C++ sources:
 $(OBJDIR)/%.o: %.cpp
@@ -284,6 +282,10 @@ $(call PLUGINNAME,UnstructuredHexahedralTecplotASCIIFile): $(OBJDIR)/Concrete/Te
                                                            $(OBJDIR)/Concrete/UnstructuredHexahedralTecplotASCIIFile.o
 
 $(call PLUGINNAME,MultiChannelImageStack): PACKAGES += MYIMAGES
+
+$(call PLUGINNAME,XDMFFile): PACKAGES += MYFILES
+
+$(call PLUGINNAME,FITSFile): PACKAGES += MYFILES
 
 $(call PLUGINNAME,DicomImageStack): $(OBJDIR)/Concrete/DicomImageStack.o \
                                     $(OBJDIR)/Concrete/DicomImageFile.o

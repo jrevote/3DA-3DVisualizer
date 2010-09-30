@@ -51,9 +51,12 @@ XDMFFile::XDMFFile(void)
 
 Visualization::Abstract::DataSet* XDMFFile::load(const std::vector<std::string>& args,Comm::MulticastPipe* pipe) const
 	{
-   /* Our XDMF variables: */
+   /* XDMF variables: */
    XdmfDOM* dom;
-   XdmfGrid* grid;
+   XdmfGrid* meshGrid;
+   XdmfTopology* topology;
+   XdmfArray* connections;
+   XdmfGeometry* geometry;
    XdmfHDF* heavyData;
    XdmfTime* time;
    XdmfInt32 gridCount;
@@ -67,13 +70,39 @@ Visualization::Abstract::DataSet* XDMFFile::load(const std::vector<std::string>&
    /* Get the number of Grid elements: */
    gridCount=dom->FindNumberOfElements("Grid"); 
 
+   /* Get the mesh grid: */
+   meshGrid=new XdmfGrid();
+   meshGrid->SetDOM(dom);
+   meshGrid->SetElement(dom->FindElementByPath("/Xdmf/Domain/Grid"));
+
+   /* Read the light data: */
+   meshGrid->UpdateInformation();
+
+   /* Read the heavy data (topology, geometry): */
+   meshGrid->Update();
+
+   /* Get the topology: */
+   topology=meshGrid->GetTopology();
+
+   /* Get the connectivity/connections: */
+   connections=topology->GetConnectivity();
+
+   /* Get the geometry: */
+   geometry=meshGrid->GetGeometry();
+
+   /* Get the attributes: */
+   for(int i=0;i<meshGrid->GetNumberOfAttributes();++i)
+      {
+      XdmfAttribute* attribute=meshGrid->GetAttribute(i);  
+      }
+
    /* Size of data set in C memory / file order: Z varies fastest, then X, then Y: */
    DS::Index numNodes(-1,-1,-1);
 	
 	/* Create result data set: */
 	EarthDataSet<DataSet>* result=new EarthDataSet<DataSet>(args);
 	result->getDs().setData(numNodes);
-	
+
 	return result;
 	}
 

@@ -56,9 +56,9 @@ MODULE_NAMES = SphericalASCIIFile \
                StructuredGocadFile \
                StructuredCloudFile \
                SphericalCloudFile \
-               XDMFFile \
-               FITSFile \
                CloudFile
+               #XDMFFile \
+               FITSFile \
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them

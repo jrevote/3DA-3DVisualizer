@@ -59,21 +59,26 @@ Visualization::Abstract::DataSet* XDMFFile::load(const std::vector<std::string>&
    XdmfGeometry* geometry;
    XdmfHDF* heavyData;
    XdmfTime* time;
-   XdmfInt32 gridCount;
+   XdmfXmlNode meshGridNode;
+   XdmfArray* vertices;
 
-	/* Open the data file: */
+   /* Create the Domain Object Model: */
    dom=new XdmfDOM();
 
-   if(dom->Parse("MyXDMF.xml")!=XDMF_SUCCESS)
+	/* Open the data file: */
+   if(dom->Parse(args[0].c_str())!=XDMF_SUCCESS)
       Misc::throwStdErr("XDMFFileReader::XDMFFileReader: error parsing the xdmf file");
 
-   /* Get the number of Grid elements: */
-   gridCount=dom->FindNumberOfElements("Grid"); 
+   /* Get the mesh grid node: */
+   meshGridNode=dom->FindElementByPath("/Xdmf/Domain/Grid[1]");
 
-   /* Get the mesh grid: */
+   /* Create the mesh grid: */
+   std::cout<<"Loading Grid..."<<std::flush;
    meshGrid=new XdmfGrid();
    meshGrid->SetDOM(dom);
-   meshGrid->SetElement(dom->FindElementByPath("/Xdmf/Domain/Grid"));
+   meshGrid->SetElement(meshGridNode);
+   std::cout<<"(DONE)\n"<<std::flush;
+   std::cout<<"   Name: "<<dom->GetAttribute(meshGridNode, "Name")<<"\n"<<std::flush;
 
    /* Read the light data: */
    meshGrid->UpdateInformation();
@@ -82,22 +87,40 @@ Visualization::Abstract::DataSet* XDMFFile::load(const std::vector<std::string>&
    meshGrid->Update();
 
    /* Get the topology: */
+   std::cout<<"Loading Topology..."<<std::flush;
    topology=meshGrid->GetTopology();
+   std::cout<<"(DONE)\n"<<std::flush;
+   std::cout<<"   Type: "<<topology->GetTopologyTypeAsString()<<"\n"<<std::flush;
+   std::cout<<"   Number of Elements: "<<topology->GetNumberOfElements()<<"\n"<<std::flush;
 
    /* Get the connectivity/connections: */
    connections=topology->GetConnectivity();
 
    /* Get the geometry: */
+   std::cout<<"Loading Geometry..."<<std::flush;
    geometry=meshGrid->GetGeometry();
+   std::cout<<"(DONE)\n"<<std::flush;
+   std::cout<<"   Type: "<<geometry->GetGeometryTypeAsString()<<"\n"<<std::flush;
+   std::cout<<"   Points: "<<geometry->GetNumberOfPoints()<<"\n"<<std::flush;
+
+   /* Get the points/vertices from the geometry: */
+   std::cout<<"Loading Points...\n"<<std::flush;
+   vertices=geometry->GetPoints();
+
+   XdmfFloat64* x,y,z;
+   for(int point_I=0;point_I<geometry->GetNumberOfPoints();++point_I)
+      {
+      std::cout<<"Index "<<point_I<<": "<<vertices->GetValues(point_I*3,3)<<"\n"<<std::flush; 
+      }
 
    /* Get the attributes: */
-   for(int i=0;i<meshGrid->GetNumberOfAttributes();++i)
+   for(int attr_I=0;attr_I<meshGrid->GetNumberOfAttributes();++attr_I)
       {
-      XdmfAttribute* attribute=meshGrid->GetAttribute(i);  
+      XdmfAttribute* attribute=meshGrid->GetAttribute(attr_I);  
       }
 
    /* Size of data set in C memory / file order: Z varies fastest, then X, then Y: */
-   DS::Index numNodes(-1,-1,-1);
+   DS::Index numNodes(1,1,1);
 	
 	/* Create result data set: */
 	EarthDataSet<DataSet>* result=new EarthDataSet<DataSet>(args);

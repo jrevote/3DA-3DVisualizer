@@ -51,34 +51,26 @@ XDMFFile::XDMFFile(void)
 
 Visualization::Abstract::DataSet* XDMFFile::load(const std::vector<std::string>& args,Comm::MulticastPipe* pipe) const
 	{
-   /* XDMF variables: */
-   XdmfDOM* dom;
-   XdmfGrid* meshGrid;
-   XdmfTopology* topology;
-   XdmfArray* connections;
-   XdmfGeometry* geometry;
    XdmfHDF* heavyData;
-   XdmfTime* time;
-   XdmfXmlNode meshGridNode;
-   XdmfArray* vertices;
+
+	/* Create result data set: */
+   DataSet* result = new DataSet;
 
    /* Create the Domain Object Model: */
-   dom=new XdmfDOM();
+   XdmfDOM* dom=new XdmfDOM();
 
 	/* Open the data file: */
    if(dom->Parse(args[0].c_str())!=XDMF_SUCCESS)
       Misc::throwStdErr("XDMFFileReader::XDMFFileReader: error parsing the xdmf file");
 
    /* Get the mesh grid node: */
-   meshGridNode=dom->FindElementByPath("/Xdmf/Domain/Grid[1]");
+   XdmfXmlNode meshGridNode=dom->FindElementByPath("/Xdmf/Domain/Grid[1]");
 
    /* Create the mesh grid: */
    std::cout<<"Loading Grid..."<<std::flush;
-   meshGrid=new XdmfGrid();
+   XdmfGrid* meshGrid=new XdmfGrid();
    meshGrid->SetDOM(dom);
    meshGrid->SetElement(meshGridNode);
-   std::cout<<"(DONE)\n"<<std::flush;
-   std::cout<<"   Name: "<<dom->GetAttribute(meshGridNode, "Name")<<"\n"<<std::flush;
 
    /* Read the light data: */
    meshGrid->UpdateInformation();
@@ -86,46 +78,115 @@ Visualization::Abstract::DataSet* XDMFFile::load(const std::vector<std::string>&
    /* Read the heavy data (topology, geometry): */
    meshGrid->Update();
 
+   std::cout<<"(DONE)\n"<<std::flush;
+   std::cout<<"   Name: "<<dom->GetAttribute(meshGridNode,"Name")<<"\n"<<std::flush;
+   std::cout<<"   Number of Attributes: "<<meshGrid->GetNumberOfAttributes()<<"\n"<<std::flush;
+
    /* Get the topology: */
    std::cout<<"Loading Topology..."<<std::flush;
-   topology=meshGrid->GetTopology();
+   XdmfTopology* topology=meshGrid->GetTopology();
+   XdmfConstString topologyType=topology->GetTopologyTypeAsString();
    std::cout<<"(DONE)\n"<<std::flush;
-   std::cout<<"   Type: "<<topology->GetTopologyTypeAsString()<<"\n"<<std::flush;
+   std::cout<<"   Type: "<<topologyType<<"\n"<<std::flush;
    std::cout<<"   Number of Elements: "<<topology->GetNumberOfElements()<<"\n"<<std::flush;
 
    /* Get the connectivity/connections: */
-   connections=topology->GetConnectivity();
+   std::cout<<"Loading Connections..."<<std::flush;
+   XdmfArray* connections=topology->GetConnectivity();
+   std::cout<<"(DONE)\n"<<std::flush;
+
+   int verticesPerElement;
+
+   if(!strcmp(topologyType,"Hexahedron"))
+      {
+      verticesPerElement=8;
+      }
+   for(int conn_I=0;conn_I<topology->GetNumberOfElements();++conn_I)
+      {
+      for(int stride_I=0;stride_I<verticesPerElement;++stride_I)
+         {
+         std::cout<<connections->GetValueAsInt32((conn_I*verticesPerElement)+stride_I)<<" "<<std::flush;
+         }
+      std::cout<<"\n"<<std::flush;
+      //std::cout<<connections->GetValues((conn_I*verticesPerElement),verticesPerElement)<<"\n"<<std::flush;
+      }
 
    /* Get the geometry: */
    std::cout<<"Loading Geometry..."<<std::flush;
-   geometry=meshGrid->GetGeometry();
+   XdmfGeometry* geometry=meshGrid->GetGeometry();
    std::cout<<"(DONE)\n"<<std::flush;
    std::cout<<"   Type: "<<geometry->GetGeometryTypeAsString()<<"\n"<<std::flush;
-   std::cout<<"   Points: "<<geometry->GetNumberOfPoints()<<"\n"<<std::flush;
+   std::cout<<"   Number of Points: "<<geometry->GetNumberOfPoints()<<"\n"<<std::flush;
 
    /* Get the points/vertices from the geometry: */
    std::cout<<"Loading Points...\n"<<std::flush;
-   vertices=geometry->GetPoints();
+   XdmfArray* vertices=geometry->GetPoints();
+#if 0
+   /* Define the result data set's grid layout: */
+   DS& dataSet = result->getDs(); // Get the internal data representation from the result data set
+   dataSet.setGrid((const int)geometry->GetNumberOfPoints()); // Set the data set's number of vertices
 
-   XdmfFloat64* x,y,z;
+   /* Define the result data set's variables as they are selected in 3D Visualizer's menus: */
+   DataValue& dataValue = result->getDataValue(); // Get the internal representations of the data set's value space
+   dataValue.initialize(&dataSet); // Initialize the value space for the data set
+#endif
    for(int point_I=0;point_I<geometry->GetNumberOfPoints();++point_I)
       {
-      std::cout<<"Index "<<point_I<<": "<<vertices->GetValues(point_I*3,3)<<"\n"<<std::flush; 
+      DS::Index index; // Index counting variable containing three integers I, J, K
+      XdmfFloat64 x,y,z;
+      double pos[3];
+      /* 
+      index[0]=point_I*3;
+      index[1]=(point_I*3)+1;
+      index[2]=(point_I*3)+2;
+      x=vertices->GetValueAsFloat64(index[0]);
+      y=vertices->GetValueAsFloat64(index[1]);
+      z=vertices->GetValueAsFloat64(index[2]);
+      pos[0]=x;
+      pos[1]=y;
+      pos[2]=z;
+
+      dataSet.getVertexPosition(index)=DS::Point(pos);*/
+      //std::cout<<"xyz: "<<x<<" "<<y<<" "<<z<<"\n"<<std::flush;
       }
+
+   /* Release the grid big data: */
+   meshGrid->Release();
 
    /* Get the attributes: */
+   std::cout<<"Loading Attributes...\n"<<std::flush;
    for(int attr_I=0;attr_I<meshGrid->GetNumberOfAttributes();++attr_I)
       {
-      XdmfAttribute* attribute=meshGrid->GetAttribute(attr_I);  
+      XdmfAttribute* attribute=meshGrid->GetAttribute(attr_I);
+      attribute->UpdateInformation();
+      attribute->Update();
+      std::cout<<"   Found Attribute: "<<attribute->Get("Name")<<"\n"<<std::flush;
+      std::cout<<"      Type: "<<attribute->GetAttributeTypeAsString()<<"\n"<<std::flush;
+      std::cout<<"      Center: "<<attribute->GetAttributeCenterAsString()<<"\n"<<std::flush;
+
+      XdmfArray* values=attribute->GetValues();
+      std::cout<<values<<" "<<values->GetValues()<<"\n"<<std::flush;
+
+      /*XdmfHDF* attrH5=new XdmfHDF();
+      char dataFile[100];
+      strcpy(dataFile,attribute->Get("Name"));
+      strcat(dataFile,".00001.h5:/data");
+   
+      attrH5->Open(dataFile);
+      std::cout<<"      Opened H5 file: "<<dataFile<<"\n"<<std::flush;
+      attrH5->Close();*/
+
+      /* Initialise and read the attribute big data: */
+      /*attribute->Update();*/
+
+      /* Release attribute big data: */
+      attribute->Release();
       }
 
-   /* Size of data set in C memory / file order: Z varies fastest, then X, then Y: */
-   DS::Index numNodes(1,1,1);
-	
-	/* Create result data set: */
-	EarthDataSet<DataSet>* result=new EarthDataSet<DataSet>(args);
-	result->getDs().setData(numNodes);
-
+   /* Finalize the data set's grid structure (required): */
+   //dataSet.finalizeGrid();
+ 
+   /* Return the result data set: */
 	return result;
 	}
 

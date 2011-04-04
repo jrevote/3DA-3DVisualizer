@@ -1,5 +1,5 @@
 /***********************************************************************
-XDMFFile - Class to encapsulate operations on XDMF files.
+UnderworldHDF5File - Class to encapsulate operations on XDMF files.
 Copyright (c) 2006-2007 Oliver Kreylos
 
 This file is part of the 3D Data Visualizer (Visualizer).
@@ -43,11 +43,11 @@ typedef Visualization::Wrappers::Module<DS,DataValue> BaseModule; // Module base
 
 }
 
-class XDMFFile:public BaseModule
+class UnderworldHDF5File:public BaseModule
 	{
 	/* Constructors and destructors: */
 	public:
-	XDMFFile(void); // Default constructor
+	UnderworldHDF5File(void); // Default constructor
 	
 	/* Methods: */
 	virtual Visualization::Abstract::DataSet* load(const std::vector<std::string>& args,Comm::MulticastPipe* pipe) const;

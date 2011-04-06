@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <string.h>
 #include <iostream>
 #include <iomanip>
+#include <Misc/SelfDestructPointer.h>
 #include <Misc/ThrowStdErr.h>
 #include <Misc/File.h>
 #include <Misc/LargeFile.h>
@@ -79,12 +80,30 @@ const char* getOrderString(H5T_order_t orderID)
 Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std::string>& args,Comm::MulticastPipe* pipe) const
 	{
 	/* Create result data set: */
-   DataSet* result = new DataSet;
+   Misc::SelfDestructPointer<DataSet> result(new DataSet);
+   DS& dataSet=result->getDs();
+
+   /* Parse command line arguments: */
+   const char* meshFileName=0;
+   bool nextMesh=false;
+   bool nextScalar=false;
+   bool nextVector=false;
+   for(std::vector<std::string>::const_iterator argIt=args.begin();argIt!=args.end();++argIt)
+      {
+      if(strcasecmp(argIt->c_str(),"-mesh"))
+         {
+         ++argIt;
+         meshFileName=argIt->c_str();
+         }
+      }
+
+   if(meshFileName==0)
+      Misc::throwStdErr("UnderworldHDF5File::load: No input mesh name provided");
 
    /* Open/read the mesh dataset: */
    int meshSize[3];
    std::cout<<"Reading Mesh file...\n"<<std::flush;
-   hid_t meshFile=H5Fopen(args[0].c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
+   hid_t meshFile=H5Fopen(meshFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
    hid_t meshGroupID=H5Gopen(meshFile,"/");
    H5O_info_t meshInfo;
    H5Oget_info(meshGroupID,&meshInfo);
@@ -120,9 +139,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       std::cout<<"---------Rank: "<<attrRank<<"\n"<<std::flush;
       std::cout<<"---------Dimension: "<<std::flush;
       for(int dim_I=0;dim_I<attrRank;++dim_I)
-         {
          std::cout<<(int)attrDim[dim_I]<<std::flush;
-         }
       std::cout<<"\n"<<std::flush;
 
       /* Based on the DATATYPE, read the attribute values into the buffer: */
@@ -138,9 +155,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
             {
             std::cout<<float_array[point_I]<<std::flush;
             if((int)npoints>1&&(point_I+1)<(int)npoints)
-               {
                std::cout<<" "<<std::flush;
-               }
             }
          std::cout<<"\n"<<std::flush;
          free(float_array);
@@ -157,9 +172,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
             {
             std::cout<<int_array[point_I]<<std::flush;
             if((int)npoints>1&&(point_I+1)<(int)npoints)
-               {
                std::cout<<" "<<std::flush;
-               }
             }
          std::cout<<"\n"<<std::flush;
          free(int_array);
@@ -200,9 +213,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       std::cout<<connDims[conn_I]<<std::flush;
       connCount[conn_I]=connDims[conn_I];
       if((int)connRank>1&&(conn_I+1)<(int)connRank)
-         {
          std::cout<<" "<<std::flush;
-         }
       }
    std::cout<<"\n"<<std::flush;
 
@@ -226,15 +237,16 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Read connectivity values: */
    int connValues[connDims[0]][connDims[1]];
    connRet=H5Dread(connDataSet,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&connValues[0][0]);
+
+#ifdef DEBUG
    /* Display connectivity values: */
    for(int conn_I=0;conn_I<connDims[0];++conn_I)
       {
       for(int conn_J=0;conn_J<connDims[1];++conn_J)
-         {
          std::cout<<"("<<conn_I<<" "<<conn_J<<"): "<<connValues[conn_I][conn_J]<<" "<<std::flush;
-         }
       std::cout<<"\n"<<std::flush;
       }
+#endif
 
    /* Get the vertices from the mesh h5 file: */
    std::cout<<"Loading Vertices...\n"<<std::flush;
@@ -256,16 +268,14 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    hsize_t vertDims[64];
    herr_t vertRet=H5Sget_simple_extent_dims(vertSpace,vertDims,NULL);
 
-   /* Display vertices inforamtion: */
+   /* Display vertices information: */
    std::cout<<"---Rank: "<<vertRank<<"\n"<<std::flush;
    std::cout<<"---Dimensions: "<<std::flush;
    for(int vert_I=0;vert_I<vertRank;++vert_I)
       {
       std::cout<<vertDims[vert_I]<<std::flush;
       if((int)vertRank>1&&(vert_I+1)<(int)vertRank)
-         {
          std::cout<<" "<<std::flush;
-         }
       }
    std::cout<<"\n"<<std::flush;
 
@@ -286,17 +296,45 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    size_t vertSize=H5Tget_size(vertDataType);
    std::cout<<"---Size: "<<vertSize<<"\n"<<std::flush;
    
-   /* Read connectivity values: */
+   /* Read vertices values: */
    float vertValues[vertDims[0]][vertDims[1]];
    vertRet=H5Dread(vertDataSet,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&vertValues[0][0]);
-   /* Display connectivity values: */
+
+#ifdef DEBUG
+   /* Display vertices values: */
    for(int vert_I=0;vert_I<vertDims[0];++vert_I)
       {
       for(int vert_J=0;vert_J<vertDims[1];++vert_J)
-         {
          std::cout<<"("<<vert_I<<" "<<vert_J<<"): "<<vertValues[vert_I][vert_J]<<" "<<std::flush;
-         }
       std::cout<<"\n"<<std::flush;
+      }
+#endif
+
+   /* Prepare mesh for loading: */
+   dataSet.reserveCells(connDims[0]);
+   dataSet.reserveVertices(vertDims[0]);
+
+   /* Load all grid vertices: */
+   std::cout<<"Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
+   DS::VertexIndex vertexIndexBase=dataSet.getTotalNumVertices();
+   std::cout<<"---Total number of Vertices: "<<vertexIndexBase<<"\n"<<std::flush;
+   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
+      {
+      DS::Point vertexPosition;
+      for(int vert_J=0;vert_J<vertDims[1];++vert_J)
+         vertexPosition[vert_J]=Scalar(vertValues[vert_I][vert_J]);
+      DS::VertexIndex vertexIndex=dataSet.addVertex(vertexPosition).getIndex();
+      }
+
+   /* Load all grid cells: */
+   std::cout<<"Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
+   for(int conn_I=0;conn_I<connDims[0];++conn_I)
+      {
+      DS::VertexID cellVertices[connDims[1]];
+      for(int conn_J=0;conn_J<connDims[1];++conn_J)
+         cellVertices[conn_J]=DS::VertexID(vertexIndexBase+connValues[conn_I][conn_J]);
+      /* Add the cell to the dataset: */
+      dataSet.addCell(cellVertices);
       }
 
    /* Close all handles: */
@@ -304,13 +342,14 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    H5Sclose(connSpace);
    H5Dclose(vertDataSet);
    H5Sclose(vertSpace);
+
+   /* Finalize the grid structure: */
+   std::cout<<"Finalizing grid structure..."<<std::flush;
+   dataSet.finalizeGrid();
+   std::cout<<" (DONE)"<<std::endl;
    
-   /*H5Dread(meshDataSet,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,meshSize);*/
-
-   /*std::cout<<"Resolution: "<<meshSize<<"\n"<<std::flush;*/
-
    /* Return the result data set: */
-	return result;
+	return result.releaseTarget();
 	}
 
 Visualization::Abstract::DataSetRenderer* UnderworldHDF5File::getRenderer(const Visualization::Abstract::DataSet* dataSet) const

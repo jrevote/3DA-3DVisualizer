@@ -37,7 +37,6 @@ VRUIDIR = /usr/local/packages/Vrui-1.0-068
 # directories underneath the given base directory, respectively.
 # Important note: Do not use ~ as an abbreviation for the user's home
 # directory here; use $(HOME) instead.
-#INSTALLDIR = /home/jrevote/Documents/Projects/3D-Alive/Development/Builds/3DVisualizer-1.7
 INSTALLDIR = /usr/local/packages/3DVisualizer-1.7
 
 # List of default visualization modules:
@@ -53,14 +52,17 @@ MODULE_NAMES = SphericalASCIIFile \
                CitcomtVectorFile \
                StructuredHexahedralTecplotASCIIFile \
                UnstructuredHexahedralTecplotASCIIFile \
+               UnstructuredPlot3DFile \
                ImageStack \
                MultiChannelImageStack \
                StructuredGocadFile \
                StructuredCloudFile \
                SphericalCloudFile \
-               CloudFile 
-               #XDMFFile \
+               CloudFile \
+               XDMFFile \
+               UnderworldHDF5File
                #FITSFile 
+
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them

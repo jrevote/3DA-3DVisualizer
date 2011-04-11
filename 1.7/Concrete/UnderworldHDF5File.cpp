@@ -124,6 +124,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    H5O_info_t meshInfo;
    H5Oget_info(meshGroupID,&meshInfo);
    std::cout<<"---Number of Attributes: "<<meshInfo.num_attrs<<"\n"<<std::flush;
+   int* meshResolution;
 
    /* Iterate through the mesh attributes: */
    for(int attr_I=0;attr_I<(unsigned)meshInfo.num_attrs;++attr_I)
@@ -154,8 +155,16 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       std::cout<<"------Attribute: "<<"\""<<attrName<<"\"\n"<<std::flush;
       std::cout<<"---------Rank: "<<attrRank<<"\n"<<std::flush;
       std::cout<<"---------Dimension: "<<std::flush;
+      bool currMeshAttr=false;
+      if(!strcasecmp(attrName,"mesh resolution"))
+         {
+         meshResolution=new int[attrDim[0]];
+         currMeshAttr=true;
+         }
       for(int dim_I=0;dim_I<attrRank;++dim_I)
+         {
          std::cout<<(int)attrDim[dim_I]<<std::flush;
+         }
       std::cout<<"\n"<<std::flush;
 
       /* Based on the DATATYPE, read the attribute values into the buffer: */
@@ -167,10 +176,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          /* Read the attribute values: */
          attrRet=H5Aread(attrID,attrTypeMem,float_array);
          std::cout<<"---------Values: "<<std::flush;
-         for(int point_I=0;point_I<(int)npoints;++point_I)
+         for(int value_I=0;value_I<(int)npoints;++value_I)
             {
-            std::cout<<float_array[point_I]<<std::flush;
-            if((int)npoints>1&&(point_I+1)<(int)npoints)
+            std::cout<<float_array[value_I]<<std::flush;
+            if((int)npoints>1&&(value_I+1)<(int)npoints)
                std::cout<<" "<<std::flush;
             }
          std::cout<<"\n"<<std::flush;
@@ -184,11 +193,13 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          /* Read the attribute values: */
          attrRet=H5Aread(attrID,attrTypeMem,int_array);
          std::cout<<"---------Values: "<<std::flush;
-         for(int point_I=0;point_I<(int)npoints;++point_I)
+         for(int value_I=0;value_I<(int)npoints;++value_I)
             {
-            std::cout<<int_array[point_I]<<std::flush;
-            if((int)npoints>1&&(point_I+1)<(int)npoints)
+            std::cout<<int_array[value_I]<<std::flush;
+            if((int)npoints>1&&(value_I+1)<(int)npoints)
                std::cout<<" "<<std::flush;
+            if(currMeshAttr)
+               meshResolution[value_I]=(int)int_array[value_I];
             }
          std::cout<<"\n"<<std::flush;
          free(int_array);
@@ -332,10 +343,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    for(int vert_I=0;vert_I<vertDims[0];++vert_I)
       vertices[vert_I]=dataSet->addVertex(UnderworldHDF5File::DS::Point(),UnderworldHDF5File::DS::Value());
          
-   for(int vert_I=0;vert_I<vertDims[1];++vert_I)
+   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
       {
-      for(int vert_J=0;vert_J<vertDims[0];++vert_J)
-         vertices[vert_J]->pos[vert_I]=vertValues[vert_J][vert_I];
+      for(int vert_J=0;vert_J<vertDims[1];++vert_J)
+         vertices[vert_I]->pos[vert_J]=vertValues[vert_I][vert_J];
       }
    std::cout<<"------Total number of Vertices: "<<dataSet->getTotalNumVertices()<<"\n"<<std::flush;
 
@@ -352,6 +363,28 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       }
    delete[] vertices;
    std::cout<<"------Total number of Vertices: "<<dataSet->getTotalNumCells()<<"\n"<<std::flush;
+#if 0
+   DS::Index numVertices;
+   numVertices[2]=meshResolution[0];
+   numVertices[1]=meshResolution[1];
+   numVertices[0]=meshResolution[2];
+
+   DataSet* result=new DataSet;
+   result->getDs().setData(numVertices);
+
+   DS::Array& vertices=result->getDs().getVertices();
+   std::cout<<meshResolution[0]<<"x"<<meshResolution[1]<<"x"<<meshResolution[2]<<"="<<vertices.getSize(0)<<"\n"<<std::flush;
+   int count_I=0;
+   for(DS::Index index(0);index[0]<vertices.getSize(0);vertices.preInc(index))
+      {
+      DS::GridVertex& vertex=vertices(index);
+      vertex.pos[0]=vertValues[count_I][0];
+      vertex.pos[1]=vertValues[count_I][1];
+      vertex.pos[2]=vertValues[count_I][2];
+      std::cout<<"Vertex: "<<count_I<<"-"<<index[0]<<" ("<<vertex.pos[0]<<" "<<vertex.pos[1]<<" "<<vertex.pos[2]<<")\n"<<std::flush;
+      ++count_I;
+      }
+#endif
 
    /* Close all handles: */
    H5Dclose(connDataSet);
@@ -362,6 +395,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Finalize the grid structure: */
    std::cout<<"Finalizing Grid Structure..."<<std::flush;
    dataSet->finalizeGrid();
+   //result->getDs().finalizeGrid();
    std::cout<<" (DONE)"<<std::endl;
    
    /* Return the result data set: */

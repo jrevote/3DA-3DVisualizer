@@ -32,12 +32,12 @@ Static elements of class Hexahedral<2>:
 
 const int Hexahedral<2>::edgeVertexIndices[Hexahedral<2>::numEdges][2]=
 	{
-	{0,1},{0,2},{3,1},{3,2}
+	{0,1},{2,3},{0,3},{1,2}
 	};
 
 const int Hexahedral<2>::faceVertexIndices[Hexahedral<2>::numFaces][Hexahedral<2>::numFaceVertices]=
 	{
-	{0,1},{1,2},{2,3},{3,0}
+	{0,1},{2,3},{0,3},{1,2}
 	};
 
 /**************************************

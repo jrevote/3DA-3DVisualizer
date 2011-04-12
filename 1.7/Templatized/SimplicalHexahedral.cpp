@@ -21,7 +21,7 @@ with the 3D Data Visualizer; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ***********************************************************************/
 
-#define VISUALIZATION_TEMPLATIZED_SIMPLICAL_IMPLEMENTATION
+#define VISUALIZATION_TEMPLATIZED_SIMPLICALHEXAHEDRAL_IMPLEMENTATION
 
 #include <new>
 #include <Misc/OneTimeQueue.h>
@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <Templatized/SimplicalHexahedral.h>
 
 #ifdef PERF_COUNTGRADIENTCALCULATIONS
+
 unsigned int numGradients=0;
 #endif
 
@@ -41,9 +42,9 @@ namespace Visualization {
 
 namespace Templatized {
 
-/************************************
+/**********************************************
 Methods of class SimplicalHexahedral::GridCell:
-************************************/
+***********************************************/
 
 template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
@@ -56,9 +57,9 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::GridCell::GridCell(
 		neighbours[i]=0;
 	}
 
-/************************************
+/**********************************************
 Methods of class SimplicalHexahedral::GridFace:
-************************************/
+***********************************************/
 
 template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
@@ -75,9 +76,9 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::GridFace::GridFace(
 		}
 	}
 
-/**********************************
+/********************************************
 Methods of class SimplicalHexahedral::EdgeID:
-**********************************/
+*********************************************/
 
 template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
@@ -97,9 +98,9 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::EdgeID::EdgeID(
 		}
 	}
 
-/********************************
+/******************************************
 Methods of class SimplicalHexahedral::Cell:
-********************************/
+*******************************************/
 
 template <class ScalarParam,int dimensionParam,class ValueParam>
 template <class ScalarExtractorParam>
@@ -185,9 +186,9 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::Cell::calcEdgePositi
 	return Geometry::affineCombination(v0->pos,v1->pos,weight);
 	}
 
-/***********************************
+/*********************************************
 Methods of class SimplicalHexahedral::Locator:
-***********************************/
+*********************************************/
 
 template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
@@ -323,9 +324,9 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::Locator::calcGradien
 	return Interpolator::interpolate(CellTopology::numVertices,values,cellPos.getComponents());
 	}
 
-/**************************
+/************************************
 Methods of class SimplicalHexahedral:
-**************************/
+*************************8***********/
 
 template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
@@ -343,15 +344,16 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::connectCells(
 		for(int faceIndex=0;faceIndex<CellTopology::numFaces;++faceIndex)
 			{
 			/* Get pointers to the vertices defining the current face: */
-			/* (Invariant: face i contains all vertices except i.) */
 			GridVertex* faceVertices[CellTopology::numFaceVertices];
 			GridVertex** fvPtr=faceVertices;
-			for(int i=0;i<CellTopology::numVertices;++i)
-				if(i!=faceIndex)
-					{
-					*fvPtr=cPtr->vertices[i];
-					++fvPtr;
-					}
+			for(int i=0;i<CellTopology::numFaceVertices;++i)
+	         {  
+            if(i!=faceIndex)
+               {
+			      *fvPtr=cPtr->vertices[CellTopology::faceVertexIndices[faceIndex][i]];
+		         ++fvPtr;
+               }
+		      }
 			
 			/* Create a face data structure for the current face: */
 			GridFace face(faceVertices);

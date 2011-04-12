@@ -1,5 +1,5 @@
 /***********************************************************************
-SimplicalHexahedral - Base class for vertex-centered simplical (unstructured)
+SimplicalHexahedral - Base class for vertex-centered hexahedral (unstructured)
 data sets containing arbitrary value types (scalars, vectors, tensors,
 etc.).
 Copyright (c) 2004-2007 Oliver Kreylos
@@ -128,7 +128,7 @@ class SimplicalHexahedral
 		};
 	
 	private:
-	struct GridCell // Structure for simplical grid cells
+	struct GridCell // Structure for hexahedral grid cells
 		{
 		/* Elements: */
 		public:
@@ -406,11 +406,11 @@ class SimplicalHexahedral
 	Scalar locatorEpsilon; // Default accuracy threshold for locators working on this data set
 	
 	/* Private methods: */
-	void connectCells(void); // Creates simplical mesh from unconnected simplices by connecting shared faces
+	void connectCells(void); // Creates hexahedral mesh from unconnected simplices by connecting shared faces
 	
 	/* Constructors and destructors: */
 	public:
-	SimplicalHexahedral(void); // Creates an "empty" simplical data set
+	SimplicalHexahedral(void); // Creates an "empty" hexahedral data set
 	~SimplicalHexahedral(void); // Destroys the data set
 	
 	/* Data set construction methods: */

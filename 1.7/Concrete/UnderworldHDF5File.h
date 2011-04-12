@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define VISUALIZATION_CONCRETE_UNDERWORLDHDF5FILE_INCLUDED
 
 #include <Wrappers/SimplicalHexahedralIncludes.h>
-//#include <Wrappers/CurvilinearIncludes.h>
 #include <Concrete/UnderworldValue.h>
 
 #include <Wrappers/Module.h>

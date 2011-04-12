@@ -363,28 +363,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       }
    delete[] vertices;
    std::cout<<"------Total number of Cells: "<<dataSet->getTotalNumCells()<<"\n"<<std::flush;
-#if 0
-   DS::Index numVertices;
-   numVertices[2]=meshResolution[0];
-   numVertices[1]=meshResolution[1];
-   numVertices[0]=meshResolution[2];
-
-   DataSet* result=new DataSet;
-   result->getDs().setData(numVertices);
-
-   DS::Array& vertices=result->getDs().getVertices();
-   std::cout<<meshResolution[0]<<"x"<<meshResolution[1]<<"x"<<meshResolution[2]<<"="<<vertices.getSize(0)<<"\n"<<std::flush;
-   int count_I=0;
-   for(DS::Index index(0);index[0]<vertices.getSize(0);vertices.preInc(index))
-      {
-      DS::GridVertex& vertex=vertices(index);
-      vertex.pos[0]=vertValues[count_I][0];
-      vertex.pos[1]=vertValues[count_I][1];
-      vertex.pos[2]=vertValues[count_I][2];
-      std::cout<<"Vertex: "<<count_I<<"-"<<index[0]<<" ("<<vertex.pos[0]<<" "<<vertex.pos[1]<<" "<<vertex.pos[2]<<")\n"<<std::flush;
-      ++count_I;
-      }
-#endif
 
    /* Close all handles: */
    H5Dclose(connDataSet);

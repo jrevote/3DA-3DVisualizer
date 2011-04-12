@@ -36,7 +36,7 @@ class Hexahedral
 	{
 	/* Embedded classes: */
 	public:
-	static const int dimension=dimensionParam; // Dimension of the simplex
+	static const int dimension=dimensionParam; // Dimension of the hexahedral
 	static const int numVertices=dimensionParam+1; // Number of vertices
 	static const int numEdges=((dimensionParam+1)*dimensionParam)/2; // Number of edges
 	static const int numFaces=dimensionParam+1; // Number of faces
@@ -52,7 +52,7 @@ class Hexahedral<2>
 	{
 	/* Embedded classes: */
 	public:
-	static const int dimension=2; // Dimension of the simplex
+	static const int dimension=2; // Dimension of the hexahedral
 	static const int numVertices=4; // Number of vertices
 	static const int numEdges=4; // Number of edges
 	static const int numFaces=4; // Number of faces
@@ -70,7 +70,7 @@ class Hexahedral<3>
 	{
 	/* Embedded classes: */
 	public:
-	static const int dimension=3; // Dimension of the simplex
+	static const int dimension=3; // Dimension of the hexahedral
 	static const int numVertices=8; // Number of vertices
 	static const int numEdges=12; // Number of edges
 	static const int numFaces=6; // Number of faces

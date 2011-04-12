@@ -1,6 +1,6 @@
 /***********************************************************************
 IsosurfaceCaseTableHexahedral - Specialized versions of IsosurfaceCaseTable
-for two- and three-dimensional simplices.
+for two- and three-dimensional hexahedrals.
 Copyright (c) 2005-2007 Oliver Kreylos
 
 This file is part of the 3D Data Visualizer (Visualizer).
@@ -26,9 +26,9 @@ namespace Visualization {
 
 namespace Templatized {
 
-/*********************************************************
+/************************************************************
 Static elements of class IsosurfaceCaseTable<Hexahedral<3> >:
-*********************************************************/
+*************************************************************/
 
 const int IsosurfaceCaseTable<Hexahedral<3> >::triangleEdgeIndices[16][7]=
 	{

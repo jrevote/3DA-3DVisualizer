@@ -40,7 +40,7 @@ VRUIDIR = /usr/local/packages/Vrui-1.0-068
 INSTALLDIR = /usr/local/packages/3DVisualizer-1.7
 
 # List of default visualization modules:
-MODULE_NAMES = SphericalASCIIFile \
+#MODULE_NAMES = SphericalASCIIFile \
                StructuredGridASCII \
                StructuredGridVTK \
                CitcomCUCartesianRawFile \
@@ -63,6 +63,7 @@ MODULE_NAMES = SphericalASCIIFile \
                UnderworldHDF5File
                #FITSFile 
 
+MODULE_NAMES = UnderworldHDF5File
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them
@@ -203,7 +204,10 @@ TEMPLATIZED_SOURCES = Templatized/Simplex.cpp \
                       Templatized/SliceCaseTableSimplex.cpp \
                       Templatized/SliceCaseTableTesseract.cpp \
                       Templatized/IsosurfaceCaseTableSimplex.cpp \
-                      Templatized/IsosurfaceCaseTableTesseract.cpp
+                      Templatized/IsosurfaceCaseTableTesseract.cpp \
+                      Templatized/Hexahedral.cpp \
+                      Templatized/SliceCaseTableHexahedral.cpp \
+                      Templatized/IsosurfaceCaseTableHexahedral.cpp 
 
 WRAPPERS_SOURCES = Wrappers/ParametersIOHelper.cpp \
                    Wrappers/RenderArrow.cpp \

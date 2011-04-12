@@ -68,11 +68,11 @@ class GridRenderer<ScalarParam,2,ValueParam>
 		/* Render all grid cell faces that do not have neighbours: */
 		glBegin(GL_LINES);
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
-			for(int i=0;i<3;++i)
+			for(int i=0;i<8;++i)
 				if(!cIt->getNeighbourID(i).isValid())
 					{
-					glVertex(cIt->getVertexPosition((i+1)%3));
-					glVertex(cIt->getVertexPosition((i+2)%3));
+					glVertex(cIt->getVertexPosition((i+1)%8));
+					glVertex(cIt->getVertexPosition((i+2)%8));
 					}
 		glEnd();
 		}
@@ -81,11 +81,11 @@ class GridRenderer<ScalarParam,2,ValueParam>
 		/* Render all grid cell faces that do not have neighbours: */
 		glBegin(GL_LINES);
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
-			for(int i=0;i<3;++i)
+			for(int i=0;i<8;++i)
 				if(!cIt->getNeighbourID(i).isValid())
 					{
-					glVertex(cIt->getVertexPosition((i+1)%3));
-					glVertex(cIt->getVertexPosition((i+2)%3));
+					glVertex(cIt->getVertexPosition((i+1)%8));
+					glVertex(cIt->getVertexPosition((i+2)%8));
 					}
 		glEnd();
 		}
@@ -95,7 +95,7 @@ class GridRenderer<ScalarParam,2,ValueParam>
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
 			{
 			glBegin(GL_LINE_LOOP);
-			for(int i=0;i<3;++i)
+			for(int i=0;i<8;++i)
 				glVertex(cIt->getVertexPosition(i));
 			glEnd();
 			}
@@ -104,7 +104,7 @@ class GridRenderer<ScalarParam,2,ValueParam>
 		{
 		/* Render all grid cell faces: */
 		glBegin(GL_LINE_LOOP);
-		for(int i=0;i<3;++i)
+		for(int i=0;i<8;++i)
 			glVertex(cell.getVertexPosition(i));
 		glEnd();
 		}
@@ -146,21 +146,23 @@ class GridRenderer<ScalarParam,3,ValueParam>
 		}
 	inline static void renderGridOutline(const DataSet& dataSet)
 		{
-		/* Render all grid cell faces that do not have neighbours: */
+		/* Render all grid cell edges that do not have neighbours: */
 		glBegin(GL_LINES);
-		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
-			for(int i=0;i<4;++i)
+		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)   
+         {
+			for(int i=0;i<8;++i)
 				if(!cIt->getNeighbourID(i).isValid())
 					{
-					for(int j=0;j<3;++j)
+					for(int j=0;j<6;++j)
 						if(j!=i)
-							for(int k=j+1;k<4;++k)
+							for(int k=j+1;k<8;++k)
 								if(k!=i)
 									{
 									glVertex(cIt->getVertexPosition(j));
 									glVertex(cIt->getVertexPosition(k));
 									}
 					}
+         }
 		glEnd();
 		}
 	inline static void renderGridFaces(const DataSet& dataSet)
@@ -168,12 +170,12 @@ class GridRenderer<ScalarParam,3,ValueParam>
 		/* Render all grid cell faces that do not have neighbours: */
 		glBegin(GL_LINES);
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
-			for(int i=0;i<4;++i)
+			for(int i=0;i<8;++i)
 				if(!cIt->getNeighbourID(i).isValid())
 					{
 					for(int j=0;j<3;++j)
 						if(j!=i)
-							for(int k=j+1;k<4;++k)
+							for(int k=j+1;k<8;++k)
 								if(k!=i)
 									{
 									glVertex(cIt->getVertexPosition(j));
@@ -185,22 +187,44 @@ class GridRenderer<ScalarParam,3,ValueParam>
 	inline static void renderGridCells(const DataSet& dataSet)
 		{
 		/* Render all grid cell faces: */
-		glBegin(GL_LINES);
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
-			for(int i=0;i<3;++i)
-				for(int j=i+1;j<4;++j)
-					{
-					glVertex(cIt->getVertexPosition(i));
-					glVertex(cIt->getVertexPosition(j));
-					}
-		glEnd();
+         {
+         glBegin(GL_LINES);
+            glVertex(cIt->getVertexPosition(0));
+            glVertex(cIt->getVertexPosition(1));
+            glVertex(cIt->getVertexPosition(2));
+            glVertex(cIt->getVertexPosition(3));
+            glVertex(cIt->getVertexPosition(0));
+            glVertex(cIt->getVertexPosition(3));
+            glVertex(cIt->getVertexPosition(1));
+            glVertex(cIt->getVertexPosition(2));
+
+            glVertex(cIt->getVertexPosition(4));
+            glVertex(cIt->getVertexPosition(5));
+            glVertex(cIt->getVertexPosition(6));
+            glVertex(cIt->getVertexPosition(7));
+            glVertex(cIt->getVertexPosition(4));
+            glVertex(cIt->getVertexPosition(7));
+            glVertex(cIt->getVertexPosition(5));
+            glVertex(cIt->getVertexPosition(6));
+
+            glVertex(cIt->getVertexPosition(2));
+            glVertex(cIt->getVertexPosition(6));
+            glVertex(cIt->getVertexPosition(3));
+            glVertex(cIt->getVertexPosition(7));
+            glVertex(cIt->getVertexPosition(0));
+            glVertex(cIt->getVertexPosition(4));
+            glVertex(cIt->getVertexPosition(1));
+            glVertex(cIt->getVertexPosition(5));
+         glEnd();
+         }
 		}
 	inline static void highlightCell(const Cell& cell)
 		{
 		/* Render all grid cell faces: */
 		glBegin(GL_LINES);
 		for(int i=0;i<3;++i)
-			for(int j=i+1;j<4;++j)
+			for(int j=i+1;j<8;++j)
 				{
 				glVertex(cell.getVertexPosition(i));
 				glVertex(cell.getVertexPosition(j));

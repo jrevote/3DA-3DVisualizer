@@ -520,7 +520,7 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::finalizeGrid(
 		}
 	
 	/* Create the cell center tree: */
-	cellCenterTree.releasePoints(4); // Let's just go ahead and use the multithreaded version
+	cellCenterTree.releasePoints(8); // Let's just go ahead and use the multithreaded version
 	
 	/* Initialize the vertex list bounds: */
 	firstVertex=Vertex(this,firstGridVertex);

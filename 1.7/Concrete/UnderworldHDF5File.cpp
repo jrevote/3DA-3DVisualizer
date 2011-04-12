@@ -362,7 +362,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       delete[] cellVertices;
       }
    delete[] vertices;
-   std::cout<<"------Total number of Vertices: "<<dataSet->getTotalNumCells()<<"\n"<<std::flush;
+   std::cout<<"------Total number of Cells: "<<dataSet->getTotalNumCells()<<"\n"<<std::flush;
 #if 0
    DS::Index numVertices;
    numVertices[2]=meshResolution[0];

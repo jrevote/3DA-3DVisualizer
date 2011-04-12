@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <Geometry/ValuedPoint.h>
 #include <Geometry/ArrayKdTree.h>
 
-#include <Templatized/Simplex.h>
+#include <Templatized/Hexahedral.h>
 #include <Templatized/PointerID.h>
 #include <Templatized/IteratorWrapper.h>
 
@@ -56,7 +56,7 @@ class SimplicalHexahedral
 	typedef Geometry::Box<Scalar,dimensionParam> Box; // Type for axis-aligned boxes in data set's domain
 	
 	/* Definition of the data set's cell topology: */
-	typedef Simplex<dimensionParam> CellTopology; // Policy class to select appropriate cell algorithms
+	typedef Hexahedral<dimensionParam> CellTopology; // Policy class to select appropriate cell algorithms
 	
 	/* Definition of the data set's value space: */
 	typedef ValueParam Value; // Data set's value type

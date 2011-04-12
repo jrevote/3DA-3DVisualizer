@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define NONSTANDARD_GLVERTEX_TEMPLATES
 #include <Templatized/SimplicalHexahedral.h>
 #include <Templatized/SimplicalHexahedralRenderer.h>
-#include <Templatized/SliceCaseTableSimplex.h>
-#include <Templatized/IsosurfaceCaseTableSimplex.h>
+#include <Templatized/SliceCaseTableHexahedral.h>
+#include <Templatized/IsosurfaceCaseTableHexahedral.h>
 
 #endif

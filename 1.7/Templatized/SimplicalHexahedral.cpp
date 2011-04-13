@@ -348,11 +348,8 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::connectCells(
 			GridVertex** fvPtr=faceVertices;
 			for(int i=0;i<CellTopology::numFaceVertices;++i)
 	         {  
-            if(i!=faceIndex)
-               {
-			      *fvPtr=cPtr->vertices[CellTopology::faceVertexIndices[faceIndex][i]];
-		         ++fvPtr;
-               }
+			   *fvPtr=cPtr->vertices[CellTopology::faceVertexIndices[faceIndex][i]];
+		      ++fvPtr;
 		      }
 			
 			/* Create a face data structure for the current face: */

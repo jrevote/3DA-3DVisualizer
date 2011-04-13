@@ -147,42 +147,34 @@ class GridRenderer<ScalarParam,3,ValueParam>
 	inline static void renderGridOutline(const DataSet& dataSet)
 		{
 		/* Render all grid cell edges that do not have neighbours: */
-      int cell_I=0;
       glBegin(GL_LINES);
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
-         {
 			for(int i=0;i<DataSet::CellTopology::numFaces;++i)
             if(!cIt->getNeighbourID(i).isValid())
                {
-               std::cout<<"Cell: "<<cell_I<<" "<<std::flush;
-               std::cout<<"Face: "<<i<<" "<<std::flush;
-               std::cout<<"-"<<std::flush;
                for(int j=0;j<DataSet::CellTopology::numFaceVertices;++j) 
-                  {
                   glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][j]));
-                  std::cout<<" "<<std::flush;
-                  std::cout<<cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][j])[0]<<std::flush;
-                  std::cout<<" "<<std::flush;
-                  std::cout<<cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][j])[1]<<std::flush;
-                  std::cout<<" "<<std::flush;
-                  std::cout<<cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][j])[2]<<std::flush;
-                  }
-               std::cout<<"\n"<<std::flush;
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][0]));
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][3]));
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][1]));
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][2]));
                }
-         ++cell_I;
-         }
       glEnd();
 		}
 	inline static void renderGridFaces(const DataSet& dataSet)
 		{
 		/* Render all grid cell faces that do not have neighbours: */
 		glBegin(GL_LINES);
-		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)   
+		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
 			for(int i=0;i<DataSet::CellTopology::numFaces;++i)
             if(!cIt->getNeighbourID(i).isValid())
                {
-               for(int j=0;j<DataSet::CellTopology::numFaceVertices;++j)
-                  glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][j])); 
+               for(int j=0;j<DataSet::CellTopology::numFaceVertices;++j) 
+                  glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][j]));
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][0]));
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][3]));
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][1]));
+               glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][2]));
                }
 		glEnd();
 		}
@@ -192,22 +184,46 @@ class GridRenderer<ScalarParam,3,ValueParam>
       glBegin(GL_LINES);
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
 			for(int i=0;i<DataSet::CellTopology::numFaces;++i)
+            {
             for(int j=0;j<DataSet::CellTopology::numFaceVertices;++j)
-               {
                glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][j]));
-               }
+            glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][0]));
+            glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][3]));
+            glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][1]));
+            glVertex(cIt->getVertexPosition(DataSet::CellTopology::faceVertexIndices[i][2]));
+            }
       glEnd();
 		}
 	inline static void highlightCell(const Cell& cell)
 		{
 		/* Render all grid cell faces: */
 		glBegin(GL_LINES);
-		for(int i=0;i<3;++i)
-			for(int j=i+1;j<8;++j)
-				{
-				glVertex(cell.getVertexPosition(i));
-				glVertex(cell.getVertexPosition(j));
-				}
+         glVertex(cell.getVertexPosition(0));
+         glVertex(cell.getVertexPosition(1));
+         glVertex(cell.getVertexPosition(1));
+         glVertex(cell.getVertexPosition(5));
+         glVertex(cell.getVertexPosition(5));
+         glVertex(cell.getVertexPosition(4));
+         glVertex(cell.getVertexPosition(4));
+         glVertex(cell.getVertexPosition(0));
+
+         glVertex(cell.getVertexPosition(1));
+         glVertex(cell.getVertexPosition(2));
+         glVertex(cell.getVertexPosition(2));
+         glVertex(cell.getVertexPosition(6));
+         glVertex(cell.getVertexPosition(6));
+         glVertex(cell.getVertexPosition(5));
+         glVertex(cell.getVertexPosition(5));
+         glVertex(cell.getVertexPosition(1));
+
+         glVertex(cell.getVertexPosition(2));
+         glVertex(cell.getVertexPosition(3));
+         glVertex(cell.getVertexPosition(3));
+         glVertex(cell.getVertexPosition(7));
+         glVertex(cell.getVertexPosition(7));
+         glVertex(cell.getVertexPosition(6));
+         glVertex(cell.getVertexPosition(6));
+         glVertex(cell.getVertexPosition(2));
 		glEnd();
 		}
 	};

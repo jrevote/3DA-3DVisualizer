@@ -46,15 +46,15 @@ Static elements of class Hexahedral<3>:
 
 const int Hexahedral<3>::edgeVertexIndices[Hexahedral<3>::numEdges][2]=
 	{
-   {0,1},{2,3},{0,3},{1,2},
-   {4,5},{6,7},{4,7},{5,6},
-   {2,6},{3,7},{0,4},{1,5}
+   {0,1},{1,5},{5,4},{4,0},
+   {1,2},{2,6},{6,5},{5,1},
+   {2,3},{3,7},{7,6},{6,2}
 	};
 
 const int Hexahedral<3>::faceVertexIndices[Hexahedral<3>::numFaces][Hexahedral<3>::numFaceVertices]=
 	{
-   {0,1,2,3},{0,3,1,2},{4,5,6,7},
-   {4,7,5,6},{2,6,3,7},{0,4,1,5}
+   {0,1,5,4},{1,2,6,5},{2,3,7,6},
+   {3,0,4,7},{4,5,6,7},{0,1,2,3}
 	};
 
 }

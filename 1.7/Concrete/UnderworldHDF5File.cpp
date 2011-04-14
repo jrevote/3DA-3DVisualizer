@@ -353,8 +353,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    free(vertBuffer); 
    H5Sclose(vertMemSpace);
       
-   vertRet=H5Dread(vertDataSet,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&vertValues[0][0]);
-
    /* Load all grid vertices into the dataset: */
    std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
    UnderworldHDF5File::DS::GridVertexIterator* vertices=new UnderworldHDF5File::DS::GridVertexIterator[vertDims[0]];

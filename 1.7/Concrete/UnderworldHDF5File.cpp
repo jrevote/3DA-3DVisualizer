@@ -187,7 +187,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
                std::cout<<" "<<std::flush;
             }
          std::cout<<"\n"<<std::flush;
-         free(float_array);
+         delete[] float_array;
          }
       else if(attrClass==H5T_INTEGER)
          {
@@ -206,7 +206,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
                meshResolution[value_I]=(int)int_array[value_I];
             }
          std::cout<<"\n"<<std::flush;
-         free(int_array);
+         delete[] int_array;
          }
       /* Close handles: */
       H5Tclose(attrType);
@@ -282,7 +282,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       for(int conn_J=0;conn_J<connDims[1];++conn_J)
          connValues[conn_I][conn_J]=connBuffer[conn_J];
       }
-   free(connBuffer); 
+   delete[] connBuffer; 
    H5Sclose(connMemSpace);
 
    /* Get the vertices from the mesh h5 file: */
@@ -350,7 +350,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       for(int vert_J=0;vert_J<vertDims[1];++vert_J)
          vertValues[vert_I][vert_J]=vertBuffer[vert_J];
       }
-   free(vertBuffer); 
+   delete[] vertBuffer; 
    H5Sclose(vertMemSpace);
       
    /* Load all grid vertices into the dataset: */

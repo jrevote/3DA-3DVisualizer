@@ -340,7 +340,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    vertNodeCount[0]=1;
    vertNodeCount[1]=vertDims[1];
    hid_t vertMemSpace=H5Screate_simple(vertRank,vertNodeCount,NULL);
-   int* vertBuffer=new int[vertDims[1]];
+   float* vertBuffer=new float[vertDims[1]];
    for(int vert_I=0;vert_I<vertDims[0];++vert_I)
       {
       vertStart[0]=vert_I;

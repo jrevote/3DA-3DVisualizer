@@ -61,6 +61,10 @@ const char* getOrderString(H5T_order_t orderID)
       }
    }
 
+void readFieldValue(UnderworldHDF5File::DS* grid, const char* fieldFileName)
+   {
+   }
+
 }
 
 /***************************************
@@ -263,17 +267,23 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
 
    /* Read connectivity values: */
    int connValues[connDims[0]][connDims[1]];
-   connRet=H5Dread(connDataSet,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&connValues[0][0]);
-
-#ifdef DEBUG
-   /* Display connectivity values: */
+   hsize_t connStart[2],connNodeCount[2];
+   connStart[1]=0;
+   connNodeCount[0]=1;
+   connNodeCount[1]=connDims[1];
+   hid_t connMemSpace=H5Screate_simple(connRank,connNodeCount,NULL);
+   int* connBuffer=new int[connDims[1]];
    for(int conn_I=0;conn_I<connDims[0];++conn_I)
       {
+      connStart[0]=conn_I;
+      H5Sselect_hyperslab(connSpace,H5S_SELECT_SET,connStart,NULL,connNodeCount,NULL);
+      H5Sselect_all(connMemSpace);
+      connRet=H5Dread(connDataSet,H5T_NATIVE_INT,connMemSpace,connSpace,H5P_DEFAULT,connBuffer);
       for(int conn_J=0;conn_J<connDims[1];++conn_J)
-         std::cout<<"("<<conn_I<<" "<<conn_J<<"): "<<connValues[conn_I][conn_J]<<" "<<std::flush;
-      std::cout<<"\n"<<std::flush;
+         connValues[conn_I][conn_J]=connBuffer[conn_J];
       }
-#endif
+   free(connBuffer); 
+   H5Sclose(connMemSpace);
 
    /* Get the vertices from the mesh h5 file: */
    std::cout<<"---Loading Vertices...\n"<<std::flush;
@@ -325,19 +335,27 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    
    /* Read vertices values: */
    float vertValues[vertDims[0]][vertDims[1]];
-   vertRet=H5Dread(vertDataSet,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&vertValues[0][0]);
-
-#ifdef DEBUG
-   /* Display vertices values: */
+   hsize_t vertStart[2],vertNodeCount[2];
+   vertStart[1]=0;
+   vertNodeCount[0]=1;
+   vertNodeCount[1]=vertDims[1];
+   hid_t vertMemSpace=H5Screate_simple(vertRank,vertNodeCount,NULL);
+   int* vertBuffer=new int[vertDims[1]];
    for(int vert_I=0;vert_I<vertDims[0];++vert_I)
       {
+      vertStart[0]=vert_I;
+      H5Sselect_hyperslab(vertSpace,H5S_SELECT_SET,vertStart,NULL,vertNodeCount,NULL);
+      H5Sselect_all(vertMemSpace);
+      vertRet=H5Dread(vertDataSet,H5T_NATIVE_FLOAT,vertMemSpace,vertSpace,H5P_DEFAULT,vertBuffer);
       for(int vert_J=0;vert_J<vertDims[1];++vert_J)
-         std::cout<<"("<<vert_I<<" "<<vert_J<<"): "<<vertValues[vert_I][vert_J]<<" "<<std::flush;
-      std::cout<<"\n"<<std::flush;
+         vertValues[vert_I][vert_J]=vertBuffer[vert_J];
       }
-#endif
+   free(vertBuffer); 
+   H5Sclose(vertMemSpace);
+      
+   vertRet=H5Dread(vertDataSet,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&vertValues[0][0]);
 
-   /* Load all grid vertices: */
+   /* Load all grid vertices into the dataset: */
    std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
    UnderworldHDF5File::DS::GridVertexIterator* vertices=new UnderworldHDF5File::DS::GridVertexIterator[vertDims[0]];
    for(int vert_I=0;vert_I<vertDims[0];++vert_I)
@@ -350,7 +368,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       }
    std::cout<<"------Total number of Vertices: "<<dataSet->getTotalNumVertices()<<"\n"<<std::flush;
 
-   /* Load all grid cells: */
+   /* Load all grid cells into the dataset: */
    std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
    for(int conn_I=0;conn_I<connDims[0];++conn_I)
       {
@@ -369,6 +387,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    H5Sclose(connSpace);
    H5Dclose(vertDataSet);
    H5Sclose(vertSpace);
+   H5Fclose(meshFile);
 
    /* Finalize the grid structure: */
    std::cout<<"Finalizing Grid Structure..."<<std::flush;

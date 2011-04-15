@@ -89,8 +89,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    bool nextMesh=false;
    bool nextScalar=false;
    bool nextVector=false;
+   /* Iterate the command line arguments given: */
    for(std::vector<std::string>::const_iterator argIt=args.begin();argIt!=args.end();++argIt)
       {
+      /* Check for the mesh file: */
       if(strcasecmp(argIt->c_str(),"-mesh")==0)
          {
          ++argIt;
@@ -98,8 +100,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
 
          std::cout<<"Received Mesh file: \""<<meshFileName<<"\"\n"<<std::flush;
          }
+      /* Check if there are scalar variables given: */
       else if(strcasecmp(argIt->c_str(),"-scalar")==0)
          nextScalar=true;
+      /* Check if there are vector variables given: */
       else if(strcasecmp(argIt->c_str(),"-vector")==0)
          nextVector=true;
       else
@@ -107,16 +111,19 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          if(nextScalar)
             {
             std::cout<<"Received Scalar file: \""<<argIt->c_str()<<"\"\n"<<std::flush;
+            /* Save all scalar variable filenames into the list: */
             scalarFileNames.push_back(*argIt);
             }
          else if(nextVector)
             {
             std::cout<<"Received Vector file: \""<<argIt->c_str()<<"\"\n"<<std::flush;
+            /* Save all vector variable filanames into the list: */
             vectorFileNames.push_back(*argIt);
             }
          }
       }
 
+   /* Make sure that a mesh file is given: */
    if(meshFileName==0)
       Misc::throwStdErr("UnderworldHDF5File::load: No input mesh name provided.");
 
@@ -124,10 +131,12 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    int meshSize[3];
    std::cout<<"Reading Mesh...\n"<<std::flush;
    hid_t meshFile=H5Fopen(meshFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
+   /* Make sure that the mesh file is valid: */
    if(meshFile<0)
       Misc::throwStdErr("UnderworldHDF5File::load: Invalid mesh file provided.");
    hid_t meshGroupID=H5Gopen(meshFile,"/");
    H5O_info_t meshInfo;
+   /* Retrieve standard information from the mesh: */
    H5Oget_info(meshGroupID,&meshInfo);
    std::cout<<"---Number of Attributes: "<<meshInfo.num_attrs<<"\n"<<std::flush;
    int* meshResolution;
@@ -267,18 +276,24 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    vertStart[1]=(hsize_t)0;
    vertNodeCount[0]=(hsize_t)1;
    vertNodeCount[1]=(hsize_t)vertDims[1];
+   /* Create simple memory space for one record on the dataset: */
    hid_t vertMemSpace=H5Screate_simple(vertRank,vertNodeCount,NULL);
    float* vertBuffer=new float[vertDims[1]];
+   /* For each record, read and store it in the values data structure: */
    for(int vert_I=0;vert_I<vertDims[0];++vert_I)
       {
       vertStart[0]=(hsize_t)vert_I;
       H5Sselect_hyperslab(vertSpace,H5S_SELECT_SET,vertStart,NULL,vertNodeCount,NULL);
       H5Sselect_all(vertMemSpace);
+      /* Read one record (defined by the memory space) and save in the buffer: */
       vertRet=H5Dread(vertDataSet,H5T_NATIVE_FLOAT,vertMemSpace,vertSpace,H5P_DEFAULT,vertBuffer);
+      /* Pass the value from the buffer into the value data structure: */
       for(int vert_J=0;vert_J<vertDims[1];++vert_J)
          vertValues[(vert_I*vertDims[1])+vert_J]=vertBuffer[vert_J];
       }
+   /* Free temporary buffer: */
    delete[] vertBuffer; 
+   /* Close temporary memory space: */
    H5Sclose(vertMemSpace);
 
    /* Load all grid vertices into the dataset: */
@@ -346,14 +361,18 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    connStart[1]=(hsize_t)0;
    connNodeCount[0]=(hsize_t)1;
    connNodeCount[1]=(hsize_t)connDims[1];
+   /* Create simple memory space for one record on the dataset: */
    hid_t connMemSpace=H5Screate_simple(connRank,connNodeCount,NULL);
    int* connBuffer=new int[connDims[1]];
+   /* For each record, read and store it in the values data structure: */
    for(int conn_I=0;conn_I<connDims[0];++conn_I)
       {
       connStart[0]=(hsize_t)conn_I;
       H5Sselect_hyperslab(connSpace,H5S_SELECT_SET,connStart,NULL,connNodeCount,NULL);
       H5Sselect_all(connMemSpace);
+      /* Read one record (defined by the memory space) and save it in the buffer: */
       connRet=H5Dread(connDataSet,H5T_NATIVE_INT,connMemSpace,connSpace,H5P_DEFAULT,connBuffer);
+      /* Pass the value from the buffer into the value data structure: */
       for(int conn_J=0;conn_J<connDims[1];++conn_J)
          connValues[(conn_I*connDims[1])+conn_J]=connBuffer[conn_J];
       }
@@ -374,7 +393,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    delete[] vertices;
    std::cout<<"------Total number of Cells: "<<dataSet->getTotalNumCells()<<"\n"<<std::flush;
 
-   /* Free memory used: */
+   /* Free used data structures: */
    delete[] vertValues;
    delete[] connValues;
 

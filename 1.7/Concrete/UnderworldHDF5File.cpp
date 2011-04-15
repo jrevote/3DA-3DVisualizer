@@ -140,6 +140,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    bool nextMesh=false;
    bool nextScalar=false;
    bool nextVector=false;
+
    /* Iterate the command line arguments given: */
    for(std::vector<std::string>::const_iterator argIt=args.begin();argIt!=args.end();++argIt)
       {
@@ -375,6 +376,51 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    delete[] vertices;
    std::cout<<"------Total number of Cells: "<<dataSet->getTotalNumCells()<<"\n"<<std::flush;
 
+   /* Get scalar values from each of the scalar field files: */
+   for(int field_I=0;field_I<scalarFileNames.size();++field_I)
+      {
+      std::cout<<"Loading values from: \""<<scalarFileNames[field_I]<<"\"...\n"<<std::flush;
+      const char* fieldFileName=scalarFileNames[field_I].c_str(); 
+      hid_t fieldFile=H5Fopen(fieldFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
+      if(fieldFile<0)
+         Misc::throwStdErr("UnderworldHDF5File::load: Invalid field file provided.");
+      hid_t fieldDataSet=H5Dopen2(fieldFile,"/data",H5P_DEFAULT);
+      hid_t fieldDataType;
+      H5T_class_t fieldClass;
+      hid_t fieldSpace;
+      int fieldRank;
+      hsize_t fieldDims[64];
+      readMetaDataFromH5(fieldDataSet,fieldDataType,fieldClass,fieldSpace,fieldRank,fieldDims);
+
+      herr_t fieldRet;
+      float* fieldValues=new float[fieldDims[0]*(fieldDims[1]-vertDims[1])];
+      hsize_t fieldStart[2],fieldNodeCount[2];
+      fieldStart[1]=(hsize_t)0;
+      fieldNodeCount[0]=(hsize_t)1; 
+      fieldNodeCount[1]=(hsize_t)fieldDims[1]; 
+      /* Create simple memory space for one record on the dataset: */
+      hid_t fieldMemSpace=H5Screate_simple(fieldRank,fieldNodeCount,NULL);
+      float* fieldBuffer=new float[fieldDims[1]];
+      /* For each record, read and store it in the values data structure: */
+      for(int field_I=0;field_I<fieldDims[0];++field_I)
+         {
+         fieldStart[0]=(hsize_t)field_I;
+         H5Sselect_hyperslab(fieldSpace,H5S_SELECT_SET,fieldStart,NULL,fieldNodeCount,NULL);
+         H5Sselect_all(fieldMemSpace);
+         /* Read one record (defined by the memory space) and save in the buffer: */
+         fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_FLOAT,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
+         fieldValues[field_I]=fieldBuffer[fieldDims[1]-1];
+         }
+      /* Free temporary buffer: */
+      delete[] fieldBuffer; 
+      /* Close temporary memory space: */
+      H5Sclose(fieldMemSpace);
+
+      /* Close all handles: */
+      H5Sclose(fieldSpace);
+      H5Fclose(fieldFile);
+      }
+   
    /* Free used data structures: */
    delete[] vertValues;
    delete[] connValues;

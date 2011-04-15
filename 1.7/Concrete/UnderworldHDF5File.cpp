@@ -61,11 +61,62 @@ const char* getOrderString(H5T_order_t orderID)
       }
    }
 
-void readFieldValue(UnderworldHDF5File::DS* grid, const char* fieldFileName)
+const hid_t getNativeTypeFromDataClass(H5T_class_t dataClass)
    {
+   switch(dataClass)
+      {
+      case H5T_FLOAT:
+         return H5T_NATIVE_FLOAT;
+      case H5T_INTEGER:
+         return H5T_NATIVE_INT;
+      }
    }
 
+void readMetaDataFromH5(hid_t dataSet,hid_t &dataType,H5T_class_t &dataClass,hid_t &dataSpace,int &dataRank,hsize_t dataDims[])
+   {
+   /* Get DATATYPE: */
+   dataType=H5Dget_type(dataSet);
+   /* Get class: */
+   dataClass=H5Tget_class(dataType);
+   /* Get DATASPACE: */
+   dataSpace=H5Dget_space(dataSet);
+   /* Get rank: */
+   dataRank=H5Sget_simple_extent_ndims(dataSpace);
+   herr_t dataRet=H5Sget_simple_extent_dims(dataSpace,dataDims,NULL);
+       
+   /* Display data information: */
+   std::cout<<"------Rank: "<<dataRank<<"\n"<<std::flush;
+   std::cout<<"------Dimensions: "<<std::flush;
+   for(int data_I=0;data_I<dataRank;++data_I)
+      {
+      std::cout<<dataDims[data_I]<<std::flush;
+      if((int)dataRank>1&&(data_I+1)<(int)dataRank)
+         std::cout<<" "<<std::flush;
+      }
+   std::cout<<"\n"<<std::flush;
+
+   /* Check data DATATYPE: */
+   char dataClassString[100];
+   strcpy(dataClassString,getClassString(dataClass));
+   std::cout<<"------Type: "<<dataClassString<<"\n"<<std::flush;
+
+   /* Get dataices order: */
+   H5T_order_t dataOrder=H5Tget_order(dataType);
+
+   /* Check data order: */
+   char dataOrderString[100];
+   strcpy(dataOrderString,getOrderString(dataOrder));
+   std::cout<<"------Order: "<<dataOrderString<<"\n"<<std::flush;
+
+   /* Get data size: */ 
+   size_t dataSize=H5Tget_size(dataType);
+   std::cout<<"------Size: "<<dataSize<<"\n"<<std::flush;
+   }
 }
+
+void readRealDataFromH5(int dataRank,hsize_t dataDims[],hid_t dataSpace,char* type)
+   {
+   }
 
 /***************************************
 Methods of class UnderworldHDF5File:
@@ -97,7 +148,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          {
          ++argIt;
          meshFileName=argIt->c_str();
-
          std::cout<<"Received Mesh file: \""<<meshFileName<<"\"\n"<<std::flush;
          }
       /* Check if there are scalar variables given: */
@@ -157,14 +207,14 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       H5T_class_t attrClass=H5Tget_class(attrType);
       /* Get attribute DATASPACE: */
       hid_t attrSpace=H5Aget_space(attrID);
-      /* Get attribute DATATYPE native memory: */
-      hid_t attrTypeMem=H5Tget_native_type(attrType,H5T_DIR_ASCEND);
       /* Get attribute name: */
       H5Aget_name(attrID,100,attrName);
       /* Get attribute rank: */
       int attrRank=H5Sget_simple_extent_ndims(attrSpace);
       /* Get attribute dimension: */
       herr_t attrRet=H5Sget_simple_extent_dims(attrSpace,attrDim,NULL);
+      /* Get attribute DATATYPE native memory: */
+      hid_t attrTypeMem=H5Tget_native_type(attrType,H5T_DIR_ASCEND);
 
       /* Display attribute information: */
       std::cout<<"------Attribute: "<<"\""<<attrName<<"\"\n"<<std::flush;
@@ -229,48 +279,15 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Get the vertices from the mesh h5 file: */
    std::cout<<"---Loading Vertices...\n"<<std::flush;
    hid_t vertDataSet=H5Dopen2(meshFile,"/vertices",H5P_DEFAULT);
-
-   /* Get vertices DATATYPE: */
-   hid_t vertDataType=H5Dget_type(vertDataSet); 
-   /* Get vertices class: */
-   H5T_class_t vertClass=H5Tget_class(vertDataType);
-   /* Get vertices DATASPACE: */ 
-   hid_t vertSpace=H5Dget_space(vertDataSet);
-   /* Get vertices rank: */
-   int vertRank=H5Sget_simple_extent_ndims(vertSpace);
-   /* Get vertices dimension: */
+   hid_t vertDataType;
+   H5T_class_t vertClass;
+   hid_t vertSpace;
+   int vertRank;
    hsize_t vertDims[64];
-   herr_t vertRet=H5Sget_simple_extent_dims(vertSpace,vertDims,NULL);
+   readMetaDataFromH5(vertDataSet,vertDataType,vertClass,vertSpace,vertRank,vertDims);
 
-   /* Display vertices information: */
-   std::cout<<"------Rank: "<<vertRank<<"\n"<<std::flush;
-   std::cout<<"------Dimensions: "<<std::flush;
-   for(int vert_I=0;vert_I<vertRank;++vert_I)
-      {
-      std::cout<<vertDims[vert_I]<<std::flush;
-      if((int)vertRank>1&&(vert_I+1)<(int)vertRank)
-         std::cout<<" "<<std::flush;
-      }
-   std::cout<<"\n"<<std::flush;
-
-   /* Check vertices DATATYPE: */
-   char vertClassString[100];
-   strcpy(vertClassString,getClassString(vertClass));
-   std::cout<<"------Type: "<<vertClassString<<"\n"<<std::flush;
-
-   /* Get vertices order: */
-   H5T_order_t vertOrder=H5Tget_order(vertDataType);
-
-   /* Check vertices order: */
-   char vertOrderString[100];
-   strcpy(vertOrderString,getOrderString(vertOrder));
-   std::cout<<"------Order: "<<vertOrderString<<"\n"<<std::flush;
-
-   /* Get vertices size: */ 
-   size_t vertSize=H5Tget_size(vertDataType);
-   std::cout<<"------Size: "<<vertSize<<"\n"<<std::flush;
-   
    /* Read vertices values: */
+   herr_t vertRet;
    float* vertValues=new float[vertDims[0]*vertDims[1]];
    hsize_t vertStart[2],vertNodeCount[2];
    vertStart[1]=(hsize_t)0;
@@ -312,50 +329,15 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Get the connectivity from the mesh h5 file: */
    std::cout<<"---Loading Connectivity...\n"<<std::flush;
    hid_t connDataSet=H5Dopen2(meshFile,"/connectivity",H5P_DEFAULT);
-
-   /* Get connectivity DATATYPE: */
-   hid_t connDataType=H5Dget_type(connDataSet);
-   /* Get connectivity class: */
-   H5T_class_t connClass=H5Tget_class(connDataType);
-   /* Get connectivity DATASPACE: */
-   hid_t connSpace=H5Dget_space(connDataSet); 
-   /* Get connectivity rank: */
-   int connRank=H5Sget_simple_extent_ndims(connSpace);
-   /* Get connectivity dimension: */
-   hsize_t connDims[connRank];
-   herr_t connRet=H5Sget_simple_extent_dims(connSpace,connDims,NULL);
-   hsize_t* connCount=(hsize_t *)malloc(sizeof(hsize_t)*(int)connRank);
-
-   /* Display connectivity information: */
-   std::cout<<"------Rank: "<<connRank<<"\n"<<std::flush;
-   std::cout<<"------Dimensions: "<<std::flush;
-   for(int conn_I=0;conn_I<connRank;++conn_I)
-      {
-      std::cout<<connDims[conn_I]<<std::flush;
-      connCount[conn_I]=connDims[conn_I];
-      if((int)connRank>1&&(conn_I+1)<(int)connRank)
-         std::cout<<" "<<std::flush;
-      }
-   std::cout<<"\n"<<std::flush;
-
-   /* Check connectivity DATATYPE: */
-   char connClassString[100];
-   strcpy(connClassString,getClassString(connClass));
-   std::cout<<"------Type: "<<connClassString<<"\n"<<std::flush;
-   
-   /* Get connectivity order: */
-   H5T_order_t connOrder=H5Tget_order(connDataType);
-
-   /* Check connectivity order: */
-   char connOrderString[100];
-   strcpy(connOrderString,getOrderString(connOrder));
-   std::cout<<"------Order: "<<connOrderString<<"\n"<<std::flush;
-
-   /* Get connectivity size: */
-   size_t connSize=H5Tget_size(connDataType);
-   std::cout<<"------Size: "<<connSize<<"\n"<<std::flush;
+   hid_t connDataType;
+   H5T_class_t connClass;
+   hid_t connSpace;
+   int connRank;
+   hsize_t connDims[64];
+   readMetaDataFromH5(connDataSet,connDataType,connClass,connSpace,connRank,connDims);
 
    /* Read connectivity values: */
+   herr_t connRet;
    int* connValues=new int[connDims[0]*connDims[1]];
    hsize_t connStart[2],connNodeCount[2];
    connStart[1]=(hsize_t)0;

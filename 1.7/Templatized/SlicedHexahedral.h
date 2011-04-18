@@ -1,8 +1,8 @@
 /***********************************************************************
-SimplicalHexahedral - Base class for vertex-centered hexahedral (unstructured)
-data sets containing arbitrary value types (scalars, vectors, tensors,
+SlicedHexahedral - Base class for vertex-centered unstructured
+hypercubic data sets containing multiple scalar-valued slices.
 etc.).
-Copyright (c) 2004-2007 Oliver Kreylos
+Copyright (c) 2009 Oliver Kreylos
 
 This file is part of the 3D Data Visualizer (Visualizer).
 
@@ -21,11 +21,12 @@ with the 3D Data Visualizer; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ***********************************************************************/
 
-#ifndef VISUALIZATION_TEMPLATIZED_SIMPLICALHEXAHEDRAL_INCLUDED
-#define VISUALIZATION_TEMPLATIZED_SIMPLICALHEXAHEDRAL_INCLUDED
+#ifndef VISUALIZATION_TEMPLATIZED_SLICEDHEXAHEDRAL_INCLUDED
+#define VISUALIZATION_TEMPLATIZED_SLICEDHEXAHEDRAL_INCLUDED
 
 #include <utility>
-#include <Misc/PoolAllocator.h>
+#include <vector>
+#include <Misc/UnorderedTuple.h>
 #include <Misc/HashTable.h>
 #include <Geometry/ComponentArray.h>
 #include <Geometry/Point.h>
@@ -36,7 +37,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include <Templatized/SlicedDataValue.h>
 #include <Templatized/Hexahedral.h>
-#include <Templatized/PointerID.h>
+#include <Templatized/LinearIndexID.h>
 #include <Templatized/IteratorWrapper.h>
 
 namespace Visualization {
@@ -44,7 +45,7 @@ namespace Visualization {
 namespace Templatized {
 
 template <class ScalarParam,int dimensionParam,class ValueScalarParam>
-class SimplicalHexahedral
+class SlicedHexahedral
 	{
 	/* Embedded classes: */
 	public:
@@ -60,142 +61,59 @@ class SimplicalHexahedral
 	typedef Hexahedral<dimensionParam> CellTopology; // Policy class to select appropriate cell algorithms
 	
 	/* Definition of the data set's value space: */
-	//typedef ValueParam Value; // Data set's value type
-   /* Definition of the data set's value space: */
-   typedef ValueScalarParam ValueScalar; // Data set's value type
-   typedef SlicedDataValue<ValueScalar> Value; // Data set's compound value type
+	typedef ValueScalarParam ValueScalar; // Data set's value type
+	typedef SlicedDataValue<ValueScalar> Value; // Data set's compound value type
+	
+	/* First batch of data set interface classes: */
+	typedef LinearIndexID VertexID; // ID type for vertices
+	typedef VertexID::Index VertexIndex; // Index type for vertices
+	typedef Misc::UnorderedTuple<VertexIndex,2> EdgeID; // ID type for cell edges
+	typedef LinearIndexID CellID; // ID type for cells
+	typedef CellID::Index CellIndex; // Index type for cells
 	
 	/* Low-level definitions of data set storage: */
-	struct GridVertex // Structure for valued grid vertices
-		{
-		/* Elements: */
-		public:
-		Point pos; // Position of grid vertex in data set's domain
-		Value value; // Grid vertex' value
-		GridVertex* succ; // Pointer to next grid vertex in data set
-		
-		/* Constructors and destructors: */
-		GridVertex(void) // Dummy constructor
-			:succ(0)
-			{
-			}
-		GridVertex(const Point& sPos,const Value& sValue) // Elementwise constructor
-			:pos(sPos),value(sValue),
-			 succ(0)
-			{
-			}
-		};
-	
-	class GridVertexIterator // Structure to iterate through grid vertices (with ability to change them)
-		{
-		friend class SimplicalHexahedral;
-		
-		/* Elements: */
-		private:
-		GridVertex* vertex; // Vertex pointed to by iterator
-		
-		/* Constructors and destructors: */
-		public:
-		GridVertexIterator(void) // Creates invalid iterator
-			:vertex(0)
-			{
-			}
-		private:
-		GridVertexIterator(GridVertex* sVertex) // Creates iterator to the given vertex
-			:vertex(sVertex)
-			{
-			}
-		
-		/* Methods: */
-		public:
-		friend bool operator==(const GridVertexIterator& vi1,const GridVertexIterator& vi2) // Compares two vertex iterators for equality
-			{
-			return vi1.vertex==vi2.vertex;
-			}
-		friend bool operator!=(const GridVertexIterator& vi1,const GridVertexIterator& vi2) // Compares two vertex iterators for inequality
-			{
-			return vi1.vertex!=vi2.vertex;
-			}
-		GridVertex& operator*(void) const // Returns vertex pointed to by the iterator
-			{
-			return *vertex;
-			}
-		GridVertex* operator->(void) const // Returns vertex pointed to by the iterator
-			{
-			return vertex;
-			}
-		GridVertexIterator& operator++(void) // Pre-increment operator
-			{
-			vertex=vertex->succ;
-			return *this;
-			}
-		};
-	
 	private:
-	struct GridCell // Structure for hexahedral grid cells
+	typedef Point GridVertex; // Grid vertices are just points
+	typedef std::vector<GridVertex> GridVertexList; // Type to store the list of grid vertices
+	
+	struct GridCell // Structure for grid cells
 		{
 		/* Elements: */
 		public:
-		GridVertex* vertices[CellTopology::numVertices]; // Array of pointers to cell's vertices
-		GridCell* neighbours[CellTopology::numFaces]; // Array of pointers to neighbouring cells
-		GridCell* succ; // Pointer to next grid cell in data set
+		VertexIndex vertices[CellTopology::numVertices]; // Array of indices of cell's vertices
+		CellIndex neighbours[CellTopology::numFaces]; // Array of indices of cell's neighbouring cells
 		
 		/* Constructors and destructors: */
-		GridCell(void); // Creates a nonconnected grid cell with uninitialized vertex pointers
+		GridCell(void); // Creates a nonconnected grid cell with uninitialized vertex indices
 		};
 	
-	struct GridFace // Structure for faces of grid cells
-		{
-		/* Elements: */
-		public:
-		GridVertex* vertices[CellTopology::numFaceVertices]; // Array of pointers to face's vertices
-		
-		/* Constructors and destructors: */
-		GridFace(GridVertex* sVertices[CellTopology::numFaceVertices]); // Creates grid face from given vertex pointer array
-		
-		/* Methods: */
-		inline friend bool operator!=(const GridFace& f1,const GridFace& f2)
-			{
-			for(int i=0;i<CellTopology::numFaceVertices;++i)
-				if(f1.vertices[i]!=f2.vertices[i])
-					return true;
-			return false;
-			}
-		inline static size_t hash(const GridFace& source,size_t tableSize)
-			{
-			size_t result=0;
-			for(int i=0;i<CellTopology::numFaceVertices;++i)
-				result=(result+reinterpret_cast<size_t>(source.vertices[i]))*17;
-			return result%tableSize;
-			}
-		};
-	
-	typedef Misc::PoolAllocator<GridVertex> GridVertexAllocator; // Type of memory allocators for grid vertices
-	typedef Misc::PoolAllocator<GridCell> GridCellAllocator; // Type of memory allocators for grid cells
-	typedef Misc::HashTable<GridFace,std::pair<GridCell*,int>,GridFace> FaceHasher; // Data type for hash tables used during data set construction
+	typedef std::vector<GridCell> GridCellList; // Type to store the list of grid cells
+	typedef Misc::UnorderedTuple<VertexIndex,CellTopology::numFaceVertices> GridFace; // Type to identify faces of grid cells
+	typedef Misc::HashTable<GridFace,std::pair<CellIndex,int>,GridFace> GridFaceHasher; // Data type from grid faces to grid cell and cell face indices; used during data set construction
 	
 	/* Data set interface classes: */
 	public:
-	typedef PointerID<GridVertex> VertexID; // Class to identify vertices
+	class Cell;
 	
 	class Vertex // Class to represent and iterate through vertices
 		{
-		friend class SimplicalHexahedral;
+		friend class SlicedHexahedral;
+		friend class Cell;
 		
 		/* Elements: */
 		private:
-		const SimplicalHexahedral* ds; // Pointer to data set containing the vertex
-		const GridVertex* vertex; // Pointer to the grid vertex
+		const SlicedHexahedral* ds; // Pointer to data set containing the vertex
+		VertexIndex index; // Index of vertex in vertex list
 		
 		/* Constructors and destructors: */
 		public:
 		Vertex(void) // Creates an invalid vertex
-			:ds(0),vertex(0)
+			:ds(0),index(~VertexIndex(0))
 			{
 			}
 		private:
-		Vertex(const SimplicalHexahedral* sDs,const GridVertex* sVertex)
-			:ds(sDs),vertex(sVertex)
+		Vertex(const SlicedHexahedral* sDs,VertexIndex sIndex)
+			:ds(sDs),index(sIndex)
 			{
 			}
 		
@@ -203,95 +121,61 @@ class SimplicalHexahedral
 		public:
 		const Point& getPosition(void) const // Returns vertex' position in domain
 			{
-			return vertex->pos;
+			return ds->gridVertices[index];
 			}
 		template <class ValueExtractorParam>
 		typename ValueExtractorParam::DestValue getValue(const ValueExtractorParam& extractor) const // Returns vertex' value based on given extractor
 			{
-			return extractor.getValue(vertex->value);
-			}
-		template <class ScalarExtractorParam>
-		Vector calcGradient(const ScalarExtractorParam& extractor) const // Returns gradient at the vertex, based on given scalar extractor
-			{
-			return ds->calcVertexGradient(vertex,extractor);
+			return extractor.getValue(index);
 			}
 		VertexID getID(void) const // Returns vertex' ID
 			{
-			return VertexID(vertex);
+			return VertexID(index);
 			}
 		
 		/* Iterator methods: */
 		friend bool operator==(const Vertex& v1,const Vertex& v2)
 			{
-			return v1.vertex==v2.vertex;
+			return v1.index==v2.index&&v1.ds==v2.ds;
 			}
 		friend bool operator!=(const Vertex& v1,const Vertex& v2)
 			{
-			return v1.vertex!=v2.vertex;
+			return v1.index!=v2.index||v1.ds!=v2.ds;
 			}
 		Vertex& operator++(void) // Pre-increment operator
 			{
-			vertex=vertex->succ;
+			++index;
 			return *this;
 			}
 		};
 	
 	typedef IteratorWrapper<Vertex> VertexIterator; // Class to iterate through vertices
-	
-	class EdgeID // Class to identify cell edges
-		{
-		friend class Cell;
-		
-		/* Elements: */
-		private:
-		const GridVertex* vertices[2]; // The vertices of the edge, sorted by pointer value
-		
-		/* Constructors: */
-		public:
-		EdgeID(void)
-			{
-			vertices[0]=vertices[1]=0;
-			}
-		EdgeID(const GridVertex* v0,const GridVertex* v1); // Elementwise constructor
-		
-		/* Methods: */
-		friend bool operator==(const EdgeID& ei1,const EdgeID& ei2) // Compares two cell edges for equality
-			{
-			return ei1.vertices[0]==ei2.vertices[0]&&ei1.vertices[1]==ei2.vertices[1];
-			}
-		friend bool operator!=(const EdgeID& ei1,const EdgeID& ei2) // Compares two cell edges for inequality
-			{
-			return ei1.vertices[0]!=ei2.vertices[0]||ei1.vertices[1]!=ei2.vertices[1];
-			}
-		static size_t hash(const EdgeID& ei,size_t tableSize) // Calculates hash index for a cell edge
-			{
-			return (reinterpret_cast<size_t>(ei.vertices[0])*17+reinterpret_cast<size_t>(ei.vertices[1])*31)%tableSize;
-			}
-		};
-	
-	typedef PointerID<GridCell> CellID; // Class to identify cells
-	
 	class Locator;
 	
 	class Cell // Class to represent and iterate through cells
 		{
-		friend class SimplicalHexahedral;
+		friend class SlicedHexahedral;
 		friend class Locator;
 		
 		/* Elements: */
 		private:
-		const SimplicalHexahedral* ds; // Pointer to data set containing the vertex
-		const GridCell* cell; // Grid cell represented by the cell
+		const SlicedHexahedral* ds; // Pointer to data set containing the cell
+		CellIndex index; // Index of cell in cell list
+		const GridCell* cell; // Direct pointer to cell
 		
 		/* Constructors and destructors: */
 		public:
 		Cell(void) // Creates an invalid cell
-			:ds(0),cell(0)
+			:ds(0),index(~CellIndex(0)),cell(0)
 			{
 			}
 		private:
-		Cell(const SimplicalHexahedral* sDs,const GridCell* sCell) // Elementwise constructor
-			:ds(sDs),cell(sCell)
+		Cell(const SlicedHexahedral* sDs) // Creates an invalid cell for the given data set
+			:ds(sDs),index(~CellIndex(0)),cell(0)
+			{
+			}
+		Cell(const SlicedHexahedral* sDs,CellIndex sIndex) // Elementwise constructor
+			:ds(sDs),index(sIndex),cell(index!=(~CellIndex(0))?&ds->gridCells[index]:0)
 			{
 			}
 		
@@ -311,20 +195,23 @@ class SimplicalHexahedral
 			}
 		const Point& getVertexPosition(int vertexIndex) const // Returns position of given vertex of the cell
 			{
-			return cell->vertices[vertexIndex]->pos;
+			return ds->gridVertices[cell->vertices[vertexIndex]];
 			}
 		template <class ValueExtractorParam>
 		typename ValueExtractorParam::DestValue getVertexValue(int vertexIndex,const ValueExtractorParam& extractor) const // Returns value of given vertex of the cell, based on given extractor
 			{
-			return extractor.getValue(cell->vertices[vertexIndex]->value);
+			return extractor.getValue(cell->vertices[vertexIndex]);
 			}
 		template <class ScalarExtractorParam>
 		Vector calcVertexGradient(int vertexIndex,const ScalarExtractorParam& extractor) const; // Returns gradient at given vertex of the cell, based on given scalar extractor
-		EdgeID getEdgeID(int edgeIndex) const; // Returns ID of given edge of the cell
+		EdgeID getEdgeID(int edgeIndex) const // Returns ID of given edge of the cell
+			{
+			return EdgeID(cell->vertices[CellTopology::edgeVertexIndices[edgeIndex][0]],cell->vertices[CellTopology::edgeVertexIndices[edgeIndex][1]]);
+			}
 		Point calcEdgePosition(int edgeIndex,Scalar weight) const; // Returns an interpolated point along the given edge
 		CellID getID(void) const // Returns cell's ID
 			{
-			return CellID(cell);
+			return CellID(index);
 			}
 		CellID getNeighbourID(int neighbourIndex) const // Returns ID of neighbour across the given face of the cell
 			{
@@ -342,7 +229,8 @@ class SimplicalHexahedral
 			}
 		Cell& operator++(void) // Pre-increment operator
 			{
-			cell=cell->succ;
+			++index;
+			++cell;
 			return *this;
 			}
 		};
@@ -351,25 +239,28 @@ class SimplicalHexahedral
 	
 	class Locator:private Cell // Class responsible for evaluating a data set at a given position
 		{
-		friend class SimplicalHexahedral;
+		friend class SlicedHexahedral;
 		
 		/* Embedded classes: */
 		private:
-		typedef Geometry::ComponentArray<Scalar,dimensionParam+1> CellPosition; // Type for local cell coordinates
+		typedef Geometry::ComponentArray<Scalar,dimensionParam> CellPosition; // Type for local cell coordinates
 		
 		/* Elements: */
 		using Cell::ds;
+		using Cell::index;
 		using Cell::cell;
 		CellPosition cellPos; // Local coordinates of last located point inside its cell
 		Scalar epsilon,epsilon2; // Accuracy threshold of point location algorithm
+		bool cantTrace; // Flag if the locator cannot trace from the current state
+		
+		/* Private methods: */
+		bool newtonRaphsonStep(const Point& position); // Performs one Newton-Raphson step while tracing the given position
 		
 		/* Constructors and destructors: */
 		public:
-		Locator(void) // Creates invalid locator
-			{
-			}
+		Locator(void); // Creates invalid locator
 		private:
-		Locator(const SimplicalHexahedral* sDs,Scalar sEpsilon); // Creates non-localized locator associated with given data set
+		Locator(const SlicedHexahedral* sDs,Scalar sEpsilon); // Creates non-localized locator associated with given data set
 		
 		/* Methods: */
 		public:
@@ -395,52 +286,76 @@ class SimplicalHexahedral
 	
 	/* Elements: */
 	private:
-	GridVertexAllocator vertexAllocator; // Memory allocator for grid vertices
-	size_t totalNumVertices; // Total number of vertices in data set
-	GridVertex* firstGridVertex; // Pointer to first vertex in data set
-	GridVertex* lastGridVertex; // Pointer to last vertex in data set
-	GridCellAllocator cellAllocator; // Memory allocator for grid cells
-	size_t totalNumCells; // Total number of cells in data set
-	GridCell* firstGridCell; // Pointer to first cell in data set
-	GridCell* lastGridCell; // Pointer to last cell in data set
+	GridVertexList gridVertices; // List of all grid vertices
+	GridCellList gridCells; // List of all grid cells
+	int numSlices; // Number of scalar value slices in data set
+	size_t allocatedSliceSize; // Allocated size of all slice arrays
+	ValueScalar** slices; // Array of 1D arrays defining data set's value slices
 	CellCenterTree cellCenterTree; // Kd-tree containing cell centers
 	VertexIterator firstVertex,lastVertex; // Bounds of vertex list
 	CellIterator firstCell,lastCell; // Bounds of cell list
 	Box domainBox; // Bounding box of all vertices
+	Scalar avgCellRadius; // Average "radius" of all cells
+	Scalar maxCellRadius2; // Squared maximum "radius" of any cell (used as trivial reject threshold during point location)
 	Scalar locatorEpsilon; // Default accuracy threshold for locators working on this data set
+	GridFaceHasher* gridFaces; // Pointer to grid face hasher used during data set construction to connect grid cells
 	
 	/* Private methods: */
-	void connectCells(void); // Creates hexahedral mesh from unconnected simplices by connecting shared faces
+	void resizeSlices(size_t newAllocatedSize); // Resizes all existing value slices
 	
 	/* Constructors and destructors: */
 	public:
-	SimplicalHexahedral(void); // Creates an "empty" hexahedral data set
-	~SimplicalHexahedral(void); // Destroys the data set
+	SlicedHexahedral(void); // Creates an "empty" hypercubic data set
+	~SlicedHexahedral(void); // Destroys the data set
 	
 	/* Data set construction methods: */
-	GridVertexIterator addVertex(const Point& pos,const Value& value); // Adds a new grid vertex to the data set
-	CellIterator addCell(GridVertexIterator cellVertices[GridCell::numVertices]); // Adds a new cell to the data set
+	void reserveVertices(size_t numVertices); // Prepares the data set for subsequent addition of the given number of grid vertices (optional performance boost)
+	void reserveCells(size_t numCells); // Prepares the data set for subsequent addition of the given number of grid cells (optional performance boost)
+	VertexID addVertex(const Point& vertexPosition); // Adds a vertex to the grid; returns vertex' ID
+	CellID addCell(const VertexID cellVertices[CellTopology::numVertices]); // Adds a cell to the grid; returns cell's ID
+	int addSlice(const ValueScalar* sSliceValues =0); // Adds another slice to the data set; copies slice values for all points in all grids from given array if pointer is not null; returns index of new slice
 	
 	/* Low-level data access methods: */
-	GridVertexIterator beginGridVertices(void) // Returns iterator to the first vertex
+	const Point& getVertexPosition(VertexIndex vertexIndex) const // Returns position of a vertex
 		{
-		return GridVertexIterator(firstGridVertex);
+		return gridVertices[vertexIndex];
 		}
-	GridVertexIterator endGridVertices(void) // Returns iterator behind last vertex
+	Point& getVertexPosition(VertexIndex vertexIndex) // Ditto
 		{
-		return GridVertexIterator(0);
+		return gridVertices[vertexIndex];
 		}
+	int getNumSlices(void) const // Returns the number of value slices in the data set
+		{
+		return numSlices;
+		}
+	const ValueScalar* getSliceArray(int sliceIndex) const // Returns one of the data set's value slices
+		{
+		return slices[sliceIndex];
+		}
+	ValueScalar* getSliceArray(int sliceIndex) // Ditto
+		{
+		return slices[sliceIndex];
+		}
+	ValueScalar getVertexValue(int sliceIndex,VertexIndex vertexIndex) const // Returns a vertex' data value from one slice
+		{
+		return slices[sliceIndex][vertexIndex];
+		}
+	void setVertexValue(int sliceIndex,VertexIndex vertexIndex,ValueScalar newValue); // Sets the given vertex' value in the given slice
 	void finalizeGrid(void); // Recalculates derived grid information after grid structure change
+	Scalar getLocatorEpsilon(void) const // Returns the current default accuracy threshold for locators working on this data set
+		{
+		return locatorEpsilon;
+		}
 	void setLocatorEpsilon(Scalar newLocatorEpsilon); // Sets the default accuracy threshold for locators working on this data set
 	
 	/* Methods implementing the data set interface: */
 	size_t getTotalNumVertices(void) const // Returns total number of vertices in the data set
 		{
-		return totalNumVertices;
+		return gridVertices.size();
 		}
 	Vertex getVertex(const VertexID& vertexID) const // Returns vertex of given valid ID
 		{
-		return Vertex(this,vertexID.getObject());
+		return Vertex(this,vertexID.getIndex());
 		}
 	const VertexIterator& beginVertices(void) const // Returns iterator to first vertex in the data set
 		{
@@ -452,11 +367,11 @@ class SimplicalHexahedral
 		}
 	size_t getTotalNumCells(void) const // Returns total number of cells in the data set
 		{
-		return totalNumCells;
+		return gridCells.size();
 		}
-	Cell getCell(const CellID& cellID) const // Returns cell of given valid ID
+	Cell getCell(const CellID& cellID) const // Return cell of given valid ID
 		{
-		return Cell(this,cellID.getObject());
+		return Cell(this,cellID.getIndex());
 		}
 	const CellIterator& beginCells(void) const // Returns iterator to first cell in the data set
 		{
@@ -470,7 +385,10 @@ class SimplicalHexahedral
 		{
 		return domainBox;
 		}
-	Scalar calcAverageCellSize(void) const; // Calculates an estimate of the average cell size in the data set
+	Scalar calcAverageCellSize(void) const // Calculates an estimate of the average cell size in the data set
+		{
+		return avgCellRadius*Scalar(2);
+		}
 	Locator getLocator(void) const // Returns an unlocalized locator for the data set
 		{
 		return Locator(this,locatorEpsilon);
@@ -481,8 +399,8 @@ class SimplicalHexahedral
 
 }
 
-#ifndef VISUALIZATION_TEMPLATIZED_SIMPLICAL_IMPLEMENTATION
-#include <Templatized/SimplicalHexahedral.cpp>
+#ifndef VISUALIZATION_TEMPLATIZED_SLICEDHYPERCUBIC_IMPLEMENTATION
+#include <Templatized/SlicedHexahedral.cpp>
 #endif
 
 #endif

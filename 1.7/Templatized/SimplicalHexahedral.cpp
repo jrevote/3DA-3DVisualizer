@@ -46,9 +46,9 @@ namespace Templatized {
 Methods of class SimplicalHexahedral::GridCell:
 ***********************************************/
 
-template <class ScalarParam,int dimensionParam,class ValueParam>
+template <class ScalarParam,int dimensionParam,class ValueScalarParam>
 inline
-SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::GridCell::GridCell(
+SimplicalHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::GridCell::GridCell(
 	void)
 	:succ(0)
 	{
@@ -61,10 +61,10 @@ SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::GridCell::GridCell(
 Methods of class SimplicalHexahedral::GridFace:
 ***********************************************/
 
-template <class ScalarParam,int dimensionParam,class ValueParam>
+template <class ScalarParam,int dimensionParam,class ValueScalarParam>
 inline
-SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::GridFace::GridFace(
-	typename SimplicalHexahedral<ScalarParam,dimensionParam,ValueParam>::GridVertex* sVertices[])
+SimplicalHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::GridFace::GridFace(
+	typename SimplicalHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::GridVertex* sVertices[])
 	{
 	/* Sort vertex pointers from source array using insertion sort: */
 	for(int i=0;i<CellTopology::numFaceVertices;++i)

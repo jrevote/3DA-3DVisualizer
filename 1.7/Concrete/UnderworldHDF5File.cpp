@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdio.h>
 #include <Misc/ThrowStdErr.h>
 #include <Misc/File.h>
+#include <Misc/SelfDestructPointer.h>
 #include <Plugins/FactoryManager.h>
 
 #include <Concrete/UnderworldHDF5File.h>
@@ -130,8 +131,8 @@ UnderworldHDF5File::UnderworldHDF5File(void)
 Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std::string>& args,Comm::MulticastPipe* pipe) const
 	{
    /* Create result data set: */
-   DataSet* result=new DataSet;
-   UnderworldHDF5File::DS* dataSet=&result->getDs();
+   Misc::SelfDestructPointer<DataSet> result(new DataSet);
+   DS& dataSet=result->getDs();
 
    /* Parse command line arguments: */
    const char* meshFileName=0;
@@ -314,19 +315,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Close temporary memory space: */
    H5Sclose(vertMemSpace);
 
-   /* Load all grid vertices into the dataset: */
-   std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
-   UnderworldHDF5File::DS::GridVertexIterator* vertices=new UnderworldHDF5File::DS::GridVertexIterator[vertDims[0]];
-   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
-      vertices[vert_I]=dataSet->addVertex(UnderworldHDF5File::DS::Point(),UnderworldHDF5File::DS::Value());
-         
-   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
-      {
-      for(int vert_J=0;vert_J<vertDims[1];++vert_J)
-         vertices[vert_I]->pos[vert_J]=vertValues[(vert_I*vertDims[1])+vert_J];
-      }
-   std::cout<<"------Total number of Vertices: "<<dataSet->getTotalNumVertices()<<"\n"<<std::flush;
-
    /* Get the connectivity from the mesh h5 file: */
    std::cout<<"---Loading Connectivity...\n"<<std::flush;
    hid_t connDataSet=H5Dopen2(meshFile,"/connectivity",H5P_DEFAULT);
@@ -362,19 +350,9 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    delete[] connBuffer; 
    H5Sclose(connMemSpace);
 
-   /* Load all grid cells into the dataset: */
-   std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
-   for(int conn_I=0;conn_I<connDims[0];++conn_I)
-      {
-      UnderworldHDF5File::DS::GridVertexIterator* cellVertices=new UnderworldHDF5File::DS::GridVertexIterator[connDims[1]];
-      for(int conn_J=0;conn_J<connDims[1];++conn_J)
-         cellVertices[conn_J]=vertices[connValues[(conn_I*connDims[1])+conn_J]];
-      /* Add the cell to the dataset: */
-      dataSet->addCell(cellVertices);
-      delete[] cellVertices;
-      }
-   delete[] vertices;
-   std::cout<<"------Total number of Cells: "<<dataSet->getTotalNumCells()<<"\n"<<std::flush;
+   /* Initialize the result data set's data value: */
+   DataValue& dataValue=result->getDataValue();
+   dataValue.initialize(&dataSet,0);
 
    /* Get scalar values from each of the scalar field files: */
    for(int field_I=0;field_I<scalarFileNames.size();++field_I)
@@ -420,6 +398,27 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       H5Sclose(fieldSpace);
       H5Fclose(fieldFile);
       }
+
+   /* Load all grid vertices into the dataset: */
+   std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
+   DS::VertexIndex* vertexIndeces=new DS::VertexIndex[vertDims[0]];
+   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
+      {
+      DS::Point vertexPosition;
+      for(int vert_J=0;vert_J<vertDims[1];++vert_J)
+         vertexPosition[vert_J]=Scalar(vertValues[(vert_I*vertDims[1])+vert_J]);
+      vertexIndeces[vert_I]=dataSet.addVertex(vertexPosition).getIndex();
+      }
+
+   /* Load all grid cells into the dataset: */
+   std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
+   for(int conn_I=0;conn_I<connDims[0];++conn_I)
+      {
+      DS::VertexID* cellVertices=new DS::VertexID[connDims[1]];
+      for( int conn_J=0;conn_J<connDims[1];++conn_J)
+         cellVertices[conn_J]=DS::VertexID(connValues[(conn_I*connDims[1])+conn_J]);
+      dataSet.addCell(cellVertices);
+      }
    
    /* Free used data structures: */
    delete[] vertValues;
@@ -434,12 +433,11 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
 
    /* Finalize the grid structure: */
    std::cout<<"Finalizing Grid Structure..."<<std::flush;
-   dataSet->finalizeGrid();
-   //result->getDs().finalizeGrid();
+   dataSet.finalizeGrid();
    std::cout<<" (DONE)"<<std::endl;
    
    /* Return the result data set: */
-	return result;
+	return result.releaseTarget();
 	}
 
 }

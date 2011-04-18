@@ -1,5 +1,5 @@
 /***********************************************************************
-UnderworldValue - Structure to represent data values stored in NASA Plot3D
+UnderworldValue - Structure to represent data values stored in NASA Underworld
 files.
 Copyright (c) 2005-2007 Oliver Kreylos
 
@@ -36,7 +36,7 @@ namespace Visualization {
 namespace Concrete {
 
 /*******************************************
-Memory representation of Plot3D file values:
+Memory representation of Underworld file values:
 *******************************************/
 
 struct UnderworldValue
@@ -176,7 +176,7 @@ class VectorExtractor<VectorParam,Visualization::Concrete::UnderworldValue>
 namespace Concrete {
 
 /*********************************************
-Data value descriptor class for Plot3D values:
+Data value descriptor class for Underworld values:
 *********************************************/
 
 template <class DataSetParam>

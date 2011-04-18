@@ -113,11 +113,12 @@ void readMetaDataFromH5(hid_t dataSet,hid_t &dataType,H5T_class_t &dataClass,hid
    size_t dataSize=H5Tget_size(dataType);
    std::cout<<"------Size: "<<dataSize<<"\n"<<std::flush;
    }
-}
 
 void readRealDataFromH5(int dataRank,hsize_t dataDims[],hid_t dataSpace,char* type)
    {
    }
+
+}
 
 /***************************************
 Methods of class UnderworldHDF5File:
@@ -133,6 +134,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Create result data set: */
    Misc::SelfDestructPointer<DataSet> result(new DataSet);
    DS& dataSet=result->getDs();
+
+   /* Initialize the result data set's data value: */
+   DataValue& dataValue=result->getDataValue();
+   dataValue.initialize(&dataSet,0);
 
    /* Parse command line arguments: */
    const char* meshFileName=0;
@@ -165,6 +170,8 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
             std::cout<<"Received Scalar file: \""<<argIt->c_str()<<"\"\n"<<std::flush;
             /* Save all scalar variable filenames into the list: */
             scalarFileNames.push_back(*argIt);
+            dataValue.addScalarVariable(argIt->c_str());
+            dataSet.addSlice();
             }
          else if(nextVector)
             {
@@ -350,12 +357,36 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    delete[] connBuffer; 
    H5Sclose(connMemSpace);
 
-   /* Initialize the result data set's data value: */
-   DataValue& dataValue=result->getDataValue();
-   dataValue.initialize(&dataSet,0);
+   /* Load all grid vertices into the dataset: */
+   std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
+   DS::VertexIndex* vertexIndices=new DS::VertexIndex[vertDims[0]];
+   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
+      {
+      DS::Point vertexPosition;
+      for(int vert_J=0;vert_J<vertDims[1];++vert_J)
+         vertexPosition[vert_J]=Scalar(vertValues[(vert_I*vertDims[1])+vert_J]);
+      vertexIndices[vert_I]=dataSet.addVertex(vertexPosition).getIndex();
+      }
+
+   /* Load all grid cells into the dataset: */
+   std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
+   for(int conn_I=0;conn_I<connDims[0];++conn_I)
+      {
+      DS::VertexID* cellVertices=new DS::VertexID[connDims[1]];
+      for( int conn_J=0;conn_J<connDims[1];++conn_J)
+         cellVertices[conn_J]=DS::VertexID(connValues[(conn_I*connDims[1])+conn_J]);
+      dataSet.addCell(cellVertices);
+      }
 
    /* Get scalar values from each of the scalar field files: */
-   for(int field_I=0;field_I<scalarFileNames.size();++field_I)
+   int numScalars=int(scalarFileNames.size());
+   int* scalarSliceIndices=new int[numScalars];
+   for(int field_I=0;field_I<numScalars;++field_I)
+      {
+      scalarSliceIndices[field_I]=dataSet.addSlice();
+      dataValue.addScalarVariable(scalarFileNames[field_I].c_str());
+      }
+   for(int field_I=0;field_I<numScalars;++field_I)
       {
       std::cout<<"Loading values from: \""<<scalarFileNames[field_I]<<"\"...\n"<<std::flush;
       const char* fieldFileName=scalarFileNames[field_I].c_str(); 
@@ -376,19 +407,24 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       fieldStart[1]=(hsize_t)0;
       fieldNodeCount[0]=(hsize_t)1; 
       fieldNodeCount[1]=(hsize_t)fieldDims[1]; 
+
       /* Create simple memory space for one record on the dataset: */
       hid_t fieldMemSpace=H5Screate_simple(fieldRank,fieldNodeCount,NULL);
       float* fieldBuffer=new float[fieldDims[1]];
+
       /* For each record, read and store it in the values data structure: */
-      for(int field_I=0;field_I<fieldDims[0];++field_I)
+      for(int field_J=0;field_J<fieldDims[0];++field_J)
          {
-         fieldStart[0]=(hsize_t)field_I;
+         fieldStart[0]=(hsize_t)field_J;
          H5Sselect_hyperslab(fieldSpace,H5S_SELECT_SET,fieldStart,NULL,fieldNodeCount,NULL);
          H5Sselect_all(fieldMemSpace);
+
          /* Read one record (defined by the memory space) and save in the buffer: */
          fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_FLOAT,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
-         fieldValues[field_I]=fieldBuffer[fieldDims[1]-1];
+         fieldValues[field_J]=fieldBuffer[fieldDims[1]-1];
+         dataSet.setVertexValue(scalarSliceIndices[field_I],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[fieldDims[1]-1]));
          }
+
       /* Free temporary buffer: */
       delete[] fieldBuffer; 
       /* Close temporary memory space: */
@@ -399,27 +435,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       H5Fclose(fieldFile);
       }
 
-   /* Load all grid vertices into the dataset: */
-   std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
-   DS::VertexIndex* vertexIndeces=new DS::VertexIndex[vertDims[0]];
-   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
-      {
-      DS::Point vertexPosition;
-      for(int vert_J=0;vert_J<vertDims[1];++vert_J)
-         vertexPosition[vert_J]=Scalar(vertValues[(vert_I*vertDims[1])+vert_J]);
-      vertexIndeces[vert_I]=dataSet.addVertex(vertexPosition).getIndex();
-      }
-
-   /* Load all grid cells into the dataset: */
-   std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
-   for(int conn_I=0;conn_I<connDims[0];++conn_I)
-      {
-      DS::VertexID* cellVertices=new DS::VertexID[connDims[1]];
-      for( int conn_J=0;conn_J<connDims[1];++conn_J)
-         cellVertices[conn_J]=DS::VertexID(connValues[(conn_I*connDims[1])+conn_J]);
-      dataSet.addCell(cellVertices);
-      }
-   
    /* Free used data structures: */
    delete[] vertValues;
    delete[] connValues;

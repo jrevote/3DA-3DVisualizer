@@ -290,8 +290,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
             std::cout<<"Received Scalar file: \""<<argIt->c_str()<<"\"\n"<<std::flush;
             /* Save all scalar variable filenames into the list: */
             scalarFileNames.push_back(*argIt);
-            dataValue.addScalarVariable(argIt->c_str());
-            dataSet.addSlice();
             }
          else if(nextVector)
             {

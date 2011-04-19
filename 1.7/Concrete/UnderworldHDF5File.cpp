@@ -433,10 +433,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    int* connValues=new int[connDims[0]*connDims[1]];
    readRealDataFromH5(connDataSet,connRank,connDims,connSpace,connValues);
 
-   /* Reserve space for dataSet: */
-   dataSet.reserveVertices((size_t)vertDims[0]);
-   dataSet.reserveCells((size_t)connDims[0]);
-
    /* Get scalar values from each of the scalar field files: */
    int numScalars=int(scalarFileNames.size());
    int* scalarSliceIndices=new int[numScalars];
@@ -445,6 +441,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       scalarSliceIndices[field_I]=dataSet.addSlice();
       dataValue.addScalarVariable(scalarFileNames[field_I].c_str());
       }
+
+   /* Reserve space for dataSet: */
+   dataSet.reserveVertices((size_t)vertDims[0]);
+   dataSet.reserveCells((size_t)connDims[0]);
 
    /* Load all grid vertices into the dataset: */
    std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
@@ -456,7 +456,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          vertexPosition[vert_J]=Scalar(vertValues[(vert_I*vertDims[1])+vert_J]);
       vertexIndices[vert_I]=dataSet.addVertex(vertexPosition).getIndex();
       }
-   std::cout<<"------Number of vertices loaded: "<<dataSet.getTotalNumVertices()<<"...\n"<<std::flush;
+   std::cout<<"------Number of vertices loaded: "<<dataSet.getTotalNumVertices()<<"\n"<<std::flush;
 
    /* Get scalar values from each of the scalar field files: */
    readFieldValues(&dataSet,scalarFileNames,vertDims,scalarSliceIndices,vertexIndices);
@@ -470,7 +470,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          cellVertices[conn_J]=DS::VertexID(connValues[(conn_I*connDims[1])+conn_J]);
       dataSet.addCell(cellVertices);
       }
-   std::cout<<"------Number of cells loaded: "<<dataSet.getTotalNumCells()<<"...\n"<<std::flush;
+   std::cout<<"------Number of cells loaded: "<<dataSet.getTotalNumCells()<<"\n"<<std::flush;
 
    /* Free used data structures: */
    delete[] vertValues;

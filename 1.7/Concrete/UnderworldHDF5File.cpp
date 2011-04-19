@@ -35,6 +35,15 @@ namespace Concrete {
 
 namespace {
 
+/**********************
+Helper data structures:
+***********************/
+enum FieldType 
+   {
+   SCALAR,
+   VECTOR
+   };
+
 /****************
 Helper functions:
 *****************/
@@ -182,14 +191,16 @@ void readRealDataFromH5(hid_t dataSet,int dataRank,hsize_t dataDims[],hid_t data
 
 void readFieldValues(
    UnderworldHDF5File::DS* dataSet,
+   DataValue& dataValue,
    std::vector<std::string> fieldFileNames,
    hsize_t vertDims[],
    int* sliceIndices,
-   DS::VertexIndex* vertexIndices)
+   DS::VertexIndex* vertexIndices,
+   FieldType fieldType)
    {
    for(int field_I=0;field_I<fieldFileNames.size();++field_I)
       {
-      const char* fieldFileName=fieldFileNames[field_I].c_str(); 
+      const char* fieldFileName=fieldFileNames[field_I].c_str();
       std::cout<<"Loading values from: \""<<fieldFileName<<"\"...\n"<<std::flush;
       hid_t fieldFile=H5Fopen(fieldFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
 
@@ -203,8 +214,32 @@ void readFieldValues(
       hsize_t fieldDims[64];
       readMetaDataFromH5(fieldDataSet,fieldDataType,fieldClass,fieldSpace,fieldRank,fieldDims);
 
-      herr_t fieldRet;
-      double* fieldValues=new double[fieldDims[0]*(fieldDims[1]-vertDims[1])];
+      switch(fieldType)
+         {
+         case SCALAR:
+            char tempName[100];
+            strcpy(tempName,fieldFileName);
+            if((fieldDims[1]-3)!=1)
+               {
+               char fieldName[100];
+               for(int field_J=0;field_J<(fieldDims[1]-3);++field_J)
+                  {
+                  char* baseName=strtok(tempName,".");
+                  sprintf(fieldName,"%s-Component-%d",baseName,field_J);
+                  dataValue.addScalarVariable(fieldName); 
+                  }
+               }
+            else
+               {
+               char* fieldName;
+               fieldName=strtok(tempName,".");
+               dataValue.addScalarVariable(fieldName); 
+               }
+            break;
+         case VECTOR:
+            break;
+         }
+
       hsize_t fieldStart[2],fieldNodeCount[2];
       fieldStart[1]=(hsize_t)0;
       fieldNodeCount[0]=(hsize_t)1; 
@@ -220,11 +255,12 @@ void readFieldValues(
          fieldStart[0]=(hsize_t)field_J;
          H5Sselect_hyperslab(fieldSpace,H5S_SELECT_SET,fieldStart,NULL,fieldNodeCount,NULL);
          H5Sselect_all(fieldMemSpace);
+
          /* Read one record (defined by the memory space) and save in the buffer: */
-         fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
-         fieldValues[field_J]=fieldBuffer[fieldDims[1]-1];
-         /* Assign field value to vertex in the dataset: */
-         dataSet->setVertexValue(sliceIndices[field_I],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[fieldDims[1]-1]));
+         herr_t fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
+         for(int field_K=0;field_K<(fieldDims[1]-vertDims[1]);++field_K)
+            /* Assign field value to vertex in the dataset: */
+            dataSet->setVertexValue(sliceIndices[field_I+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[vertDims[1]+field_K]));
          }
 
       /* Free temporary buffer: */
@@ -234,6 +270,7 @@ void readFieldValues(
 
       /* Close all handles: */
       H5Sclose(fieldSpace);
+      H5Dclose(fieldDataSet);
       H5Fclose(fieldFile);
       }
    }
@@ -432,13 +469,33 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    readRealDataFromH5(connDataSet,connRank,connDims,connSpace,connValues);
 
    /* Get scalar values from each of the scalar field files: */
-   int numScalars=int(scalarFileNames.size());
-   int* scalarSliceIndices=new int[numScalars];
-   for(int field_I=0;field_I<numScalars;++field_I)
+   int numScalars=0;
+   for(int scalar_I=0;scalar_I<int(scalarFileNames.size());++scalar_I)
       {
-      scalarSliceIndices[field_I]=dataSet.addSlice();
-      dataValue.addScalarVariable(scalarFileNames[field_I].c_str());
+      const char* fieldFileName=scalarFileNames[scalar_I].c_str();
+      hid_t fieldFile=H5Fopen(fieldFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
+      if(fieldFile<0)
+         Misc::throwStdErr("UnderworldHDF5File::load: Invalid field file (%s) provided.",fieldFileName);
+      hid_t fieldDataSet=H5Dopen2(fieldFile,"/data",H5P_DEFAULT);
+      hid_t fieldSpace=H5Dget_space(fieldDataSet);
+      hsize_t fieldDims[64];
+      herr_t fieldRet=H5Sget_simple_extent_dims(fieldSpace,fieldDims,NULL);
+      numScalars+=fieldDims[1]-vertDims[1];
+
+      /* Close all handles: */
+      H5Sclose(fieldSpace);
+      H5Dclose(fieldDataSet);
+      H5Fclose(fieldFile);
       }
+   int* scalarSliceIndices=new int[numScalars];
+   for(int scalar_I=0;scalar_I<numScalars;++scalar_I)
+      scalarSliceIndices[scalar_I]=dataSet.addSlice();
+
+   /* Get vector values from each of the vector field files: */
+   int numVectors=int(vectorFileNames.size());
+   int* vectorSliceIndices=new int[numVectors];
+   for(int vector_I=0;vector_I<numVectors;++vector_I)
+      vectorSliceIndices[vector_I]=dataSet.addSlice();
 
    /* Reserve space for dataSet: */
    dataSet.reserveVertices((size_t)vertDims[0]);
@@ -457,7 +514,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    std::cout<<"------Number of vertices loaded: "<<dataSet.getTotalNumVertices()<<"\n"<<std::flush;
 
    /* Get scalar values from each of the scalar field files: */
-   readFieldValues(&dataSet,scalarFileNames,vertDims,scalarSliceIndices,vertexIndices);
+   readFieldValues(&dataSet,dataValue,scalarFileNames,vertDims,scalarSliceIndices,vertexIndices,SCALAR);
 
    /* Load all grid cells into the dataset: */
    std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;

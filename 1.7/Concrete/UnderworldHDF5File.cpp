@@ -73,7 +73,13 @@ const hid_t getNativeTypeFromDataClass(H5T_class_t dataClass)
       }
    }
 
-void readMetaDataFromH5(hid_t dataSet,hid_t &dataType,H5T_class_t &dataClass,hid_t &dataSpace,int &dataRank,hsize_t dataDims[])
+void readMetaDataFromH5(
+   hid_t dataSet,
+   hid_t &dataType,
+   H5T_class_t &dataClass,
+   hid_t &dataSpace,
+   int &dataRank,
+   hsize_t dataDims[])
    {
    /* Get DATATYPE: */
    dataType=H5Dget_type(dataSet);
@@ -114,8 +120,122 @@ void readMetaDataFromH5(hid_t dataSet,hid_t &dataType,H5T_class_t &dataClass,hid
    std::cout<<"------Size: "<<dataSize<<"\n"<<std::flush;
    }
 
-void readRealDataFromH5(int dataRank,hsize_t dataDims[],hid_t dataSpace,char* type)
+void readRealDataFromH5(hid_t dataSet,int dataRank,hsize_t dataDims[],hid_t dataSpace,int* dataValues)
    {
+   hsize_t dataStart[2],dataNodeCount[2];
+   dataStart[1]=(hsize_t)0;
+   dataNodeCount[0]=(hsize_t)1;
+   dataNodeCount[1]=(hsize_t)dataDims[1];
+
+   /* Create simple memory space for one record on the dataset: */
+   hid_t dataMemSpace=H5Screate_simple(dataRank,dataNodeCount,NULL);
+   int* dataBuffer=new int[dataDims[1]];
+
+   /* For each record, read and store it in the values data structure: */
+   for(int data_I=0;data_I<dataDims[0];++data_I)
+      {
+      dataStart[0]=(hsize_t)data_I;
+      H5Sselect_hyperslab(dataSpace,H5S_SELECT_SET,dataStart,NULL,dataNodeCount,NULL);
+      H5Sselect_all(dataMemSpace);
+      /* Read one record (defined by the memory space) and save in the buffer: */
+      herr_t dataRet=H5Dread(dataSet,H5T_NATIVE_INT,dataMemSpace,dataSpace,H5P_DEFAULT,dataBuffer);
+      /* Pass the value from the buffer into the value data structure: */
+      for(int data_J=0;data_J<dataDims[1];++data_J)
+         dataValues[(data_I*dataDims[1])+data_J]=dataBuffer[data_J];
+      }
+
+   /* Free temporary buffer: */
+   delete[] dataBuffer; 
+   /* Close temporary memory space: */
+   H5Sclose(dataMemSpace);
+   }
+
+void readRealDataFromH5(hid_t dataSet,int dataRank,hsize_t dataDims[],hid_t dataSpace,double* dataValues)
+   {
+   hsize_t dataStart[2],dataNodeCount[2];
+   dataStart[1]=(hsize_t)0;
+   dataNodeCount[0]=(hsize_t)1;
+   dataNodeCount[1]=(hsize_t)dataDims[1];
+
+   /* Create simple memory space for one record on the dataset: */
+   hid_t dataMemSpace=H5Screate_simple(dataRank,dataNodeCount,NULL);
+   double* dataBuffer=new double[dataDims[1]];
+
+   /* For each record, read and store it in the values data structure: */
+   for(int data_I=0;data_I<dataDims[0];++data_I)
+      {
+      dataStart[0]=(hsize_t)data_I;
+      H5Sselect_hyperslab(dataSpace,H5S_SELECT_SET,dataStart,NULL,dataNodeCount,NULL);
+      H5Sselect_all(dataMemSpace);
+      /* Read one record (defined by the memory space) and save in the buffer: */
+      herr_t dataRet=H5Dread(dataSet,H5T_NATIVE_DOUBLE,dataMemSpace,dataSpace,H5P_DEFAULT,dataBuffer);
+      /* Pass the value from the buffer into the value data structure: */
+      for(int data_J=0;data_J<dataDims[1];++data_J)
+         dataValues[(data_I*dataDims[1])+data_J]=dataBuffer[data_J];
+      }
+
+   /* Free temporary buffer: */
+   delete[] dataBuffer; 
+   /* Close temporary memory space: */
+   H5Sclose(dataMemSpace);
+   }
+
+void readFieldValues(
+   UnderworldHDF5File::DS* dataSet,
+   std::vector<std::string> fieldFileNames,
+   hsize_t vertDims[],
+   int* sliceIndices,
+   DS::VertexIndex* vertexIndices)
+   {
+   for(int field_I=0;field_I<fieldFileNames.size();++field_I)
+      {
+      const char* fieldFileName=fieldFileNames[field_I].c_str(); 
+      std::cout<<"Loading values from: \""<<fieldFileName<<"\"...\n"<<std::flush;
+      hid_t fieldFile=H5Fopen(fieldFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
+
+      if(fieldFile<0)
+         Misc::throwStdErr("UnderworldHDF5File::load: Invalid field file provided.");
+      hid_t fieldDataSet=H5Dopen2(fieldFile,"/data",H5P_DEFAULT);
+      hid_t fieldDataType;
+      H5T_class_t fieldClass;
+      hid_t fieldSpace;
+      int fieldRank;
+      hsize_t fieldDims[64];
+      readMetaDataFromH5(fieldDataSet,fieldDataType,fieldClass,fieldSpace,fieldRank,fieldDims);
+
+      herr_t fieldRet;
+      double* fieldValues=new double[fieldDims[0]*(fieldDims[1]-vertDims[1])];
+      hsize_t fieldStart[2],fieldNodeCount[2];
+      fieldStart[1]=(hsize_t)0;
+      fieldNodeCount[0]=(hsize_t)1; 
+      fieldNodeCount[1]=(hsize_t)fieldDims[1]; 
+
+      /* Create simple memory space for one record on the dataset: */
+      hid_t fieldMemSpace=H5Screate_simple(fieldRank,fieldNodeCount,NULL);
+      double* fieldBuffer=new double[fieldDims[1]];
+
+      /* For each record, read and store it in the values data structure: */
+      for(int field_J=0;field_J<fieldDims[0];++field_J)
+         {
+         fieldStart[0]=(hsize_t)field_J;
+         H5Sselect_hyperslab(fieldSpace,H5S_SELECT_SET,fieldStart,NULL,fieldNodeCount,NULL);
+         H5Sselect_all(fieldMemSpace);
+         /* Read one record (defined by the memory space) and save in the buffer: */
+         fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
+         fieldValues[field_J]=fieldBuffer[fieldDims[1]-1];
+         /* Assign field value to vertex in the dataset: */
+         dataSet->setVertexValue(sliceIndices[field_I],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[fieldDims[1]-1]));
+         }
+
+      /* Free temporary buffer: */
+      delete[] fieldBuffer; 
+      /* Close temporary memory space: */
+      H5Sclose(fieldMemSpace);
+
+      /* Close all handles: */
+      H5Sclose(fieldSpace);
+      H5Fclose(fieldFile);
+      }
    }
 
 }
@@ -296,31 +416,8 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    readMetaDataFromH5(vertDataSet,vertDataType,vertClass,vertSpace,vertRank,vertDims);
 
    /* Read vertices values: */
-   herr_t vertRet;
-   float* vertValues=new float[vertDims[0]*vertDims[1]];
-   hsize_t vertStart[2],vertNodeCount[2];
-   vertStart[1]=(hsize_t)0;
-   vertNodeCount[0]=(hsize_t)1;
-   vertNodeCount[1]=(hsize_t)vertDims[1];
-   /* Create simple memory space for one record on the dataset: */
-   hid_t vertMemSpace=H5Screate_simple(vertRank,vertNodeCount,NULL);
-   float* vertBuffer=new float[vertDims[1]];
-   /* For each record, read and store it in the values data structure: */
-   for(int vert_I=0;vert_I<vertDims[0];++vert_I)
-      {
-      vertStart[0]=(hsize_t)vert_I;
-      H5Sselect_hyperslab(vertSpace,H5S_SELECT_SET,vertStart,NULL,vertNodeCount,NULL);
-      H5Sselect_all(vertMemSpace);
-      /* Read one record (defined by the memory space) and save in the buffer: */
-      vertRet=H5Dread(vertDataSet,H5T_NATIVE_FLOAT,vertMemSpace,vertSpace,H5P_DEFAULT,vertBuffer);
-      /* Pass the value from the buffer into the value data structure: */
-      for(int vert_J=0;vert_J<vertDims[1];++vert_J)
-         vertValues[(vert_I*vertDims[1])+vert_J]=vertBuffer[vert_J];
-      }
-   /* Free temporary buffer: */
-   delete[] vertBuffer; 
-   /* Close temporary memory space: */
-   H5Sclose(vertMemSpace);
+   double* vertValues=new double[vertDims[0]*vertDims[1]];
+   readRealDataFromH5(vertDataSet,vertRank,vertDims,vertSpace,vertValues);
 
    /* Get the connectivity from the mesh h5 file: */
    std::cout<<"---Loading Connectivity...\n"<<std::flush;
@@ -333,29 +430,21 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    readMetaDataFromH5(connDataSet,connDataType,connClass,connSpace,connRank,connDims);
 
    /* Read connectivity values: */
-   herr_t connRet;
    int* connValues=new int[connDims[0]*connDims[1]];
-   hsize_t connStart[2],connNodeCount[2];
-   connStart[1]=(hsize_t)0;
-   connNodeCount[0]=(hsize_t)1;
-   connNodeCount[1]=(hsize_t)connDims[1];
-   /* Create simple memory space for one record on the dataset: */
-   hid_t connMemSpace=H5Screate_simple(connRank,connNodeCount,NULL);
-   int* connBuffer=new int[connDims[1]];
-   /* For each record, read and store it in the values data structure: */
-   for(int conn_I=0;conn_I<connDims[0];++conn_I)
+   readRealDataFromH5(connDataSet,connRank,connDims,connSpace,connValues);
+
+   /* Reserve space for dataSet: */
+   dataSet.reserveVertices((size_t)vertDims[0]);
+   dataSet.reserveCells((size_t)connDims[0]);
+
+   /* Get scalar values from each of the scalar field files: */
+   int numScalars=int(scalarFileNames.size());
+   int* scalarSliceIndices=new int[numScalars];
+   for(int field_I=0;field_I<numScalars;++field_I)
       {
-      connStart[0]=(hsize_t)conn_I;
-      H5Sselect_hyperslab(connSpace,H5S_SELECT_SET,connStart,NULL,connNodeCount,NULL);
-      H5Sselect_all(connMemSpace);
-      /* Read one record (defined by the memory space) and save it in the buffer: */
-      connRet=H5Dread(connDataSet,H5T_NATIVE_INT,connMemSpace,connSpace,H5P_DEFAULT,connBuffer);
-      /* Pass the value from the buffer into the value data structure: */
-      for(int conn_J=0;conn_J<connDims[1];++conn_J)
-         connValues[(conn_I*connDims[1])+conn_J]=connBuffer[conn_J];
+      scalarSliceIndices[field_I]=dataSet.addSlice();
+      dataValue.addScalarVariable(scalarFileNames[field_I].c_str());
       }
-   delete[] connBuffer; 
-   H5Sclose(connMemSpace);
 
    /* Load all grid vertices into the dataset: */
    std::cout<<"---Loading Grid Vertices into 3DVisualizer...\n"<<std::flush;
@@ -367,6 +456,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          vertexPosition[vert_J]=Scalar(vertValues[(vert_I*vertDims[1])+vert_J]);
       vertexIndices[vert_I]=dataSet.addVertex(vertexPosition).getIndex();
       }
+   std::cout<<"------Number of vertices loaded: "<<dataSet.getTotalNumVertices()<<"...\n"<<std::flush;
+
+   /* Get scalar values from each of the scalar field files: */
+   readFieldValues(&dataSet,scalarFileNames,vertDims,scalarSliceIndices,vertexIndices);
 
    /* Load all grid cells into the dataset: */
    std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
@@ -377,63 +470,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          cellVertices[conn_J]=DS::VertexID(connValues[(conn_I*connDims[1])+conn_J]);
       dataSet.addCell(cellVertices);
       }
-
-   /* Get scalar values from each of the scalar field files: */
-   int numScalars=int(scalarFileNames.size());
-   int* scalarSliceIndices=new int[numScalars];
-   for(int field_I=0;field_I<numScalars;++field_I)
-      {
-      scalarSliceIndices[field_I]=dataSet.addSlice();
-      dataValue.addScalarVariable(scalarFileNames[field_I].c_str());
-      }
-   for(int field_I=0;field_I<numScalars;++field_I)
-      {
-      std::cout<<"Loading values from: \""<<scalarFileNames[field_I]<<"\"...\n"<<std::flush;
-      const char* fieldFileName=scalarFileNames[field_I].c_str(); 
-      hid_t fieldFile=H5Fopen(fieldFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
-      if(fieldFile<0)
-         Misc::throwStdErr("UnderworldHDF5File::load: Invalid field file provided.");
-      hid_t fieldDataSet=H5Dopen2(fieldFile,"/data",H5P_DEFAULT);
-      hid_t fieldDataType;
-      H5T_class_t fieldClass;
-      hid_t fieldSpace;
-      int fieldRank;
-      hsize_t fieldDims[64];
-      readMetaDataFromH5(fieldDataSet,fieldDataType,fieldClass,fieldSpace,fieldRank,fieldDims);
-
-      herr_t fieldRet;
-      float* fieldValues=new float[fieldDims[0]*(fieldDims[1]-vertDims[1])];
-      hsize_t fieldStart[2],fieldNodeCount[2];
-      fieldStart[1]=(hsize_t)0;
-      fieldNodeCount[0]=(hsize_t)1; 
-      fieldNodeCount[1]=(hsize_t)fieldDims[1]; 
-
-      /* Create simple memory space for one record on the dataset: */
-      hid_t fieldMemSpace=H5Screate_simple(fieldRank,fieldNodeCount,NULL);
-      float* fieldBuffer=new float[fieldDims[1]];
-
-      /* For each record, read and store it in the values data structure: */
-      for(int field_J=0;field_J<fieldDims[0];++field_J)
-         {
-         fieldStart[0]=(hsize_t)field_J;
-         H5Sselect_hyperslab(fieldSpace,H5S_SELECT_SET,fieldStart,NULL,fieldNodeCount,NULL);
-         H5Sselect_all(fieldMemSpace);
-
-         /* Read one record (defined by the memory space) and save in the buffer: */
-         fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_FLOAT,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
-         fieldValues[field_J]=fieldBuffer[fieldDims[1]-1];
-         dataSet.setVertexValue(scalarSliceIndices[field_I],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[fieldDims[1]-1]));
-         }
-
-      /* Free temporary buffer: */
-      delete[] fieldBuffer; 
-      /* Close temporary memory space: */
-      H5Sclose(fieldMemSpace);
-
-      /* Close all handles: */
-      H5Sclose(fieldSpace);
-      H5Fclose(fieldFile);
-      }
+   std::cout<<"------Number of cells loaded: "<<dataSet.getTotalNumCells()<<"...\n"<<std::flush;
 
    /* Free used data structures: */
    delete[] vertValues;

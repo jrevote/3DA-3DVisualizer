@@ -197,33 +197,25 @@ class GridRenderer<ScalarParam,3,ValueParam>
 	inline static void highlightCell(const Cell& cell)
 		{
 		/* Render all grid cell faces: */
+		glBegin(GL_LINE_STRIP);
+		glVertex(cell.getVertexPosition(0));
+		glVertex(cell.getVertexPosition(1));
+		glVertex(cell.getVertexPosition(3));
+		glVertex(cell.getVertexPosition(2));
+		glVertex(cell.getVertexPosition(0));
+		glVertex(cell.getVertexPosition(4));
+		glVertex(cell.getVertexPosition(5));
+		glVertex(cell.getVertexPosition(7));
+		glVertex(cell.getVertexPosition(6));
+		glVertex(cell.getVertexPosition(4));
+		glEnd();
 		glBegin(GL_LINES);
-         glVertex(cell.getVertexPosition(0));
-         glVertex(cell.getVertexPosition(1));
-         glVertex(cell.getVertexPosition(1));
-         glVertex(cell.getVertexPosition(5));
-         glVertex(cell.getVertexPosition(5));
-         glVertex(cell.getVertexPosition(4));
-         glVertex(cell.getVertexPosition(4));
-         glVertex(cell.getVertexPosition(0));
-
-         glVertex(cell.getVertexPosition(1));
-         glVertex(cell.getVertexPosition(2));
-         glVertex(cell.getVertexPosition(2));
-         glVertex(cell.getVertexPosition(6));
-         glVertex(cell.getVertexPosition(6));
-         glVertex(cell.getVertexPosition(5));
-         glVertex(cell.getVertexPosition(5));
-         glVertex(cell.getVertexPosition(1));
-
-         glVertex(cell.getVertexPosition(2));
-         glVertex(cell.getVertexPosition(3));
-         glVertex(cell.getVertexPosition(3));
-         glVertex(cell.getVertexPosition(7));
-         glVertex(cell.getVertexPosition(7));
-         glVertex(cell.getVertexPosition(6));
-         glVertex(cell.getVertexPosition(6));
-         glVertex(cell.getVertexPosition(2));
+		glVertex(cell.getVertexPosition(1));
+		glVertex(cell.getVertexPosition(5));
+		glVertex(cell.getVertexPosition(3));
+		glVertex(cell.getVertexPosition(7));
+		glVertex(cell.getVertexPosition(2));
+		glVertex(cell.getVertexPosition(6));
 		glEnd();
 		}
 	};

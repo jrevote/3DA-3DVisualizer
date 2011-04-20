@@ -74,7 +74,7 @@ class DataSetRenderer<SlicedHexahedral<ScalarParam,dimensionParam,ValueParam> >
 
 }
 
-#ifndef VISUALIZATION_TEMPLATIZED_SLICEDHYPERCUBICRENDERER_IMPLEMENTATION
+#ifndef VISUALIZATION_TEMPLATIZED_SLICEDHEXAHEDRALRENDERER_IMPLEMENTATION
 #include <Templatized/SlicedHexahedralRenderer.cpp>
 #endif
 

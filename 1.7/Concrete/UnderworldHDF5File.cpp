@@ -30,6 +30,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <Concrete/UnderworldHDF5File.h>
 #include <hdf5.h>
 
+#define VECTOR_COMPONENT_COUNT 4
+
 namespace Visualization {
 
 namespace Concrete {
@@ -254,16 +256,18 @@ void readFieldValues(
                }
             break;
          case VECTOR:
-            char vectorComponents[]={'X','Y','Z'};
+            std::vector<std::string> componentNames;
+            componentNames.push_back("X");
+            componentNames.push_back("Y");
+            componentNames.push_back("Z");
+            componentNames.push_back("Magnitude");
             char fieldComponentName[100];
             int vectorVariableIndex=dataValue.addVectorVariable(baseName);
-            for(int field_J=0;field_J<3;++field_J)
+            for(int field_J=0;field_J<componentNames.size();++field_J)
                {
-               sprintf(fieldComponentName,"%s-%c",baseName,vectorComponents[field_J]);
+               sprintf(fieldComponentName,"%s-%s",baseName,componentNames[field_J].c_str());
                dataValue.setVectorVariableScalarIndex(vectorVariableIndex,field_J,dataValue.addScalarVariable(fieldComponentName));
                }
-            sprintf(fieldComponentName,"%s-Magnitude",baseName);
-            dataValue.setVectorVariableScalarIndex(vectorVariableIndex,3,dataValue.addScalarVariable(fieldComponentName));
             break;
          }
 
@@ -296,12 +300,10 @@ void readFieldValues(
                   break;
                case VECTOR:
                   vector[field_K]=DS::ValueScalar(fieldBuffer[vertDims[1]+field_K]);
-                  dataSet->setVertexValue(sliceIndices[field_I*4+field_K],vertexIndices[field_J],vector[field_K]);
+                  dataSet->setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+field_K],vertexIndices[field_J],vector[field_K]);
                   break;
                } 
             }
-         if(fieldType==VECTOR)
-            dataSet->setVertexValue(sliceIndices[field_I*4+3],vertexIndices[field_J],vector.mag());           
          }
 
       /* Free temporary buffer: */
@@ -527,12 +529,12 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    int numVectors=int(vectorFileNames.size());
    for(int vector_I=0;vector_I<int(vectorFileNames.size());++vector_I)
       getFieldColumnCount(vectorFileNames[vector_I].c_str(),numVectors,vertDims[1]);
-   int* vectorSliceIndices=new int[numVectors*4];
+   int* vectorSliceIndices=new int[numVectors*VECTOR_COMPONENT_COUNT];
    for(int vector_I=0;vector_I<numVectors;++vector_I)
       {
       for(int vector_J=0;vector_J<3;++vector_J)
-         vectorSliceIndices[vector_I*4+vector_J]=dataSet.addSlice();
-      vectorSliceIndices[vector_I*4+3]=dataSet.addSlice();
+         vectorSliceIndices[vector_I*VECTOR_COMPONENT_COUNT+vector_J]=dataSet.addSlice();
+      vectorSliceIndices[vector_I*VECTOR_COMPONENT_COUNT+3]=dataSet.addSlice();
       }
 
    /* Reserve space for dataSet: */

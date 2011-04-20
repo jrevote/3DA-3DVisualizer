@@ -202,6 +202,7 @@ void getFieldColumnCount(const char* fieldFileName,int& numFields,hsize_t vertDi
    hid_t fieldSpace=H5Dget_space(fieldDataSet);
    hsize_t fieldDims[64];
    herr_t fieldRet=H5Sget_simple_extent_dims(fieldSpace,fieldDims,NULL);
+   /* Get total column for the field variable and add it to the total: */
    numFields+=fieldDims[1]-vertDims;
 
    /* Close all handles: */
@@ -239,6 +240,7 @@ void readFieldValues(
       strcpy(tempName,fieldFileName);
       char* baseName=strtok(tempName,".");
 
+      /* Add variable names: */
       switch(fieldType)
          {
          case SCALAR:
@@ -252,6 +254,7 @@ void readFieldValues(
                {
                char* fieldName;
                fieldName=strtok(tempName,".");
+               /* Add a new scalar variable: */
                dataValue.addScalarVariable(fieldName); 
                }
             break;
@@ -262,6 +265,7 @@ void readFieldValues(
             componentNames.push_back("Z");
             componentNames.push_back("Magnitude");
             char fieldComponentName[100];
+            /* Add a new vector variable: */
             int vectorVariableIndex=dataValue.addVectorVariable(baseName);
             for(int field_J=0;field_J<componentNames.size();++field_J)
                {
@@ -292,10 +296,10 @@ void readFieldValues(
          herr_t fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
          for(int field_K=0;field_K<(fieldDims[1]-vertDims[1]);++field_K)
             {
+            /* Assign field value to vertex in the dataset: */
             switch(fieldType)
                {
                case SCALAR:
-                  /* Assign field value to vertex in the dataset: */
                   dataSet->setVertexValue(sliceIndices[field_I+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[vertDims[1]+field_K]));
                   break;
                case VECTOR:

@@ -555,6 +555,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
 
    /* Get scalar values from each of the scalar field files: */
    readFieldValues(&dataSet,dataValue,scalarFileNames,vertDims,scalarSliceIndices,vertexIndices,SCALAR);
+
    /* Get vector values from each of the scalar field files: */
    readFieldValues(&dataSet,dataValue,vectorFileNames,vertDims,vectorSliceIndices,vertexIndices,VECTOR);
 

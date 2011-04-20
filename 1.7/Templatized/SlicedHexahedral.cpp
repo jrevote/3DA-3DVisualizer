@@ -1,6 +1,6 @@
 /***********************************************************************
 SlicedHexahedral - Base class for vertex-centered unstructured
-hypercubic data sets containing multiple scalar-valued slices.
+hexahedral data sets containing multiple scalar-valued slices.
 etc.).
 Copyright (c) 2009 Oliver Kreylos
 

@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <Concrete/UnderworldHDF5File.h>
 #include <hdf5.h>
 
+/* X Y Z Mag: */
 #define VECTOR_COMPONENT_COUNT 4
 
 namespace Visualization {
@@ -221,6 +222,7 @@ void readFieldValues(
    DS::VertexIndex* vertexIndices,
    FieldType fieldType)
    {
+   int sliceOffset=0;
    for(int field_I=0;field_I<fieldFileNames.size();++field_I)
       {
       const char* fieldFileName=fieldFileNames[field_I].c_str();
@@ -241,12 +243,18 @@ void readFieldValues(
       strcpy(tempName,fieldFileName);
       char* baseName=strtok(tempName,".");
 
+      int offset=fieldDims[1]-vertDims[1];
+      /* This check is required to determine if the vertex positions are defined in both the mesh
+      and the field file or just the mesh file: */
+      int columns=offset>0?offset:fieldDims[1];
+      int start=offset>0?vertDims[1]:0;
+
       /* Add variable names: */
       switch(fieldType)
          {
          case SCALAR:
-            if((fieldDims[1]-vertDims[1])!=1)
-               for(int field_J=0;field_J<(fieldDims[1]-vertDims[1]);++field_J)
+            if(offset>0)
+               for(int field_J=0;field_J<offset;++field_J)
                   {
                   sprintf(fieldName,"%s-Component-%d",baseName,field_J);
                   dataValue.addScalarVariable(fieldName); 
@@ -294,8 +302,6 @@ void readFieldValues(
          DataValue::VVector vector;
 
          /* Read one record (defined by the memory space) and save in the buffer: */
-         int offset=fieldDims[1]-vertDims[1];
-         int columns=offset>0?offset:fieldDims[1];
          herr_t fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
          for(int field_K=0;field_K<columns;++field_K)
             {
@@ -303,17 +309,18 @@ void readFieldValues(
             switch(fieldType)
                {
                case SCALAR:
-                  dataSet->setVertexValue(sliceIndices[field_I+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[offset+field_K]));
+                  dataSet->setVertexValue(sliceIndices[sliceOffset+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[start+field_K]));
                   break;
                case VECTOR:
-                  vector[field_K]=DS::ValueScalar(fieldBuffer[offset+field_K]);
-                  dataSet->setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+field_K],vertexIndices[field_J],vector[field_K]);
+                  vector[field_K]=DS::ValueScalar(fieldBuffer[start+field_K]);
+                  dataSet->setVertexValue(sliceIndices[sliceOffset*VECTOR_COMPONENT_COUNT+field_K],vertexIndices[field_J],vector[field_K]);
                   break;
                } 
             }
          if(fieldType==VECTOR)
             dataSet->setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+3],vertexIndices[field_J],vector.mag());
          }
+         sliceOffset+=offset;
 
       /* Free temporary buffer: */
       delete[] fieldBuffer; 

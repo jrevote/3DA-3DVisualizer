@@ -203,7 +203,8 @@ void getFieldColumnCount(const char* fieldFileName,int& numFields,hsize_t vertDi
    hsize_t fieldDims[64];
    herr_t fieldRet=H5Sget_simple_extent_dims(fieldSpace,fieldDims,NULL);
    /* Get total column for the field variable and add it to the total: */
-   numFields+=fieldDims[1]-vertDims;
+   int offset=fieldDims[1]-vertDims;
+   numFields+=offset>0?offset:1;
 
    /* Close all handles: */
    H5Sclose(fieldSpace);
@@ -293,21 +294,25 @@ void readFieldValues(
          DataValue::VVector vector;
 
          /* Read one record (defined by the memory space) and save in the buffer: */
+         int offset=fieldDims[1]-vertDims[1];
+         int columns=offset>0?offset:fieldDims[1];
          herr_t fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
-         for(int field_K=0;field_K<(fieldDims[1]-vertDims[1]);++field_K)
+         for(int field_K=0;field_K<columns;++field_K)
             {
             /* Assign field value to vertex in the dataset: */
             switch(fieldType)
                {
                case SCALAR:
-                  dataSet->setVertexValue(sliceIndices[field_I+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[vertDims[1]+field_K]));
+                  dataSet->setVertexValue(sliceIndices[field_I+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[offset+field_K]));
                   break;
                case VECTOR:
-                  vector[field_K]=DS::ValueScalar(fieldBuffer[vertDims[1]+field_K]);
+                  vector[field_K]=DS::ValueScalar(fieldBuffer[offset+field_K]);
                   dataSet->setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+field_K],vertexIndices[field_J],vector[field_K]);
                   break;
                } 
             }
+         if(fieldType==VECTOR)
+            dataSet->setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+3],vertexIndices[field_J],vector.mag());
          }
 
       /* Free temporary buffer: */

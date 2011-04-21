@@ -110,7 +110,7 @@ class SlicedScalarVectorDataValue:public SlicedScalarVectorDataValueBase,public 
 		dataSet=sDataSet;
 		
 		/* Initialize the base class: */
-		SlicedScalarVectorDataValueBase::initialize(dataSet->getNumSlices(),dimension,sNumVectorVariables);
+		SlicedScalarVectorDataValueBase::initialize(dataSet->getNumSlices(),dimension+1,sNumVectorVariables);
 		}
 	using SlicedScalarVectorDataValueBase::getNumScalarVariables;
 	using SlicedScalarVectorDataValueBase::getScalarVariableName;

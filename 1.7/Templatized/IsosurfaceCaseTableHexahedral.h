@@ -1,6 +1,6 @@
 /***********************************************************************
-IsosurfaceCaseTableHexahedral - Specialized versions of IsosurfaceCaseTable
-for two- and three-dimensional simplices.
+IsosurfaceCaseTableHexahedral - Specialized versions of
+IsosurfaceCaseTable for two- and three-dimensional tesseracts.
 Copyright (c) 2005-2007 Oliver Kreylos
 
 This file is part of the 3D Data Visualizer (Visualizer).
@@ -38,9 +38,9 @@ class IsosurfaceCaseTable<Hexahedral<3> >
 	typedef Hexahedral<3> CellTopology;
 	
 	/* Elements: */
-	static const int triangleEdgeIndices[16][7];
-	static const int edgeMasks[16];
-	static const int neighbourMasks[16];
+	static const int triangleEdgeIndices[256][16];
+	static const int edgeMasks[256];
+	static const int neighbourMasks[256];
 	};
 
 }

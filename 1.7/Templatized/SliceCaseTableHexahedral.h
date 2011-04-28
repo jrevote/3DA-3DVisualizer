@@ -1,6 +1,6 @@
 /***********************************************************************
-SliceCaseTableHexahedral - Specialized versions of SliceCaseTable for two-
-and three-dimensional simplices.
+SliceCaseTableHexahedral - Specialized versions of
+SliceCaseTable for two- and three-dimensional tesseracts.
 Copyright (c) 2005-2007 Oliver Kreylos
 
 This file is part of the 3D Data Visualizer (Visualizer).
@@ -38,8 +38,8 @@ class SliceCaseTable<Hexahedral<3> >
 	typedef Hexahedral<3> CellTopology;
 	
 	/* Elements: */
-	static const int edgeIndices[16][5];
-	static const int neighbourMasks[16];
+	static const int edgeIndices[256][7];
+	static const int neighbourMasks[256];
 	};
 
 }

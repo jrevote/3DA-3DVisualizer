@@ -1,6 +1,6 @@
 /***********************************************************************
 SlicedHexahedral - Base class for vertex-centered unstructured
-hexahedral data sets containing multiple scalar-valued slices.
+hypercubic data sets containing multiple scalar-valued slices.
 etc.).
 Copyright (c) 2009 Oliver Kreylos
 
@@ -560,7 +560,7 @@ SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::addCell(
 	
 	/* Connect the new cell to all existing cells: */
 	if(gridFaces==0)
-		gridFaces=new GridFaceHasher(getTotalNumCells()*CellTopology::numFaces+31);
+		gridFaces=new GridFaceHasher(101);
 	for(int faceIndex=0;faceIndex<CellTopology::numFaces;++faceIndex)
 		{
 		/* Create a face: */

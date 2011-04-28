@@ -37,10 +37,10 @@ class Hexahedral
 	/* Embedded classes: */
 	public:
 	static const int dimension=dimensionParam; // Dimension of the hexahedral
-	static const int numVertices=dimensionParam+1; // Number of vertices
-	static const int numEdges=((dimensionParam+1)*dimensionParam)/2; // Number of edges
-	static const int numFaces=dimensionParam+1; // Number of faces
-	static const int numFaceVertices=dimensionParam; // Number of vertices per face
+	static const int numVertices=1<<dimensionParam; // Number of vertices
+	static const int numEdges=dimensionParam*(1<<(dimensionParam-1)); // Number of edges
+	static const int numFaces=dimensionParam*2; // Number of faces
+	static const int numFaceVertices=1<<(dimensionParam-1); // Number of vertices per face
 	};
 
 /***********************************************************
@@ -62,7 +62,7 @@ class Hexahedral<2>
 	};
 
 /**************************************************************
-Specialized class for three-dimensional simplices (tetrahedra):
+Specialized class for three-dimensional hexahedra:
 **************************************************************/
 
 template <>

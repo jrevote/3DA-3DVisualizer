@@ -221,7 +221,7 @@ DataSetRenderer<DataSetWrapperParam>::highlightLocator(
 	const typename DataSetWrapper::Locator* myLocator=dynamic_cast<const typename DataSetWrapper::Locator*>(locator);
 	if(myLocator==0)
 		Misc::throwStdErr("DataSetRenderer::highlightLocator: Mismatching locator type");
-	
+
 	/* Set OpenGL state: */
 	GLboolean lightingEnabled=glIsEnabled(GL_LIGHTING);
 	if(lightingEnabled)

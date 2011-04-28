@@ -586,7 +586,16 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       }
    std::cout<<"------Number of cells loaded: "<<dataSet.getTotalNumCells()<<"\n"<<std::flush;
 
+   std::cout<<"------Number of slices loaded: "<<dataSet.getNumSlices()<<"\n"<<std::flush;
+
+   /* Finalize the grid structure: */
+   std::cout<<"Finalizing Grid Structure..."<<std::flush;
+   dataSet.finalizeGrid();
+   std::cout<<" (DONE)"<<std::endl;
+   
    /* Free used data structures: */
+   delete[] scalarSliceIndices;
+   delete[] vectorSliceIndices;
    delete[] vertValues;
    delete[] connValues;
 
@@ -597,11 +606,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    H5Sclose(vertSpace);
    H5Fclose(meshFile);
 
-   /* Finalize the grid structure: */
-   std::cout<<"Finalizing Grid Structure..."<<std::flush;
-   dataSet.finalizeGrid();
-   std::cout<<" (DONE)"<<std::endl;
-   
    /* Return the result data set: */
 	return result.releaseTarget();
 	}

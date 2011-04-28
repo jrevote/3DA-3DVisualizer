@@ -63,7 +63,9 @@ INSTALLDIR = /usr/local/packages/3DVisualizer-1.7
                UnderworldHDF5File
                #FITSFile 
 
-MODULE_NAMES = UnderworldHDF5File 
+MODULE_NAMES = CitcomCUCartesianRawFile \
+               StructuredCloudFile \
+               UnderworldHDF5File 
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them

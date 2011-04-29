@@ -253,7 +253,7 @@ void readFieldValues(
       switch(fieldType)
          {
          case SCALAR:
-            if(offset>0)
+            if(offset>1)
                for(int field_J=0;field_J<offset;++field_J)
                   {
                   sprintf(fieldName,"%s-Component-%d",baseName,field_J);

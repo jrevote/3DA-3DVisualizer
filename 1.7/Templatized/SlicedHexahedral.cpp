@@ -68,11 +68,11 @@ SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::Cell::calcEdgePos
 	return Geometry::affineCombination(v0,v1,weight);
 	}
 
-template <class ScalarParam,int dimensionParam,class ValueScalarParam>
+template <class ScalarParam,int dimensionParam,class ValueParam>
 template <class ScalarExtractorParam>
 inline
-typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::Vector
-SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::Cell::calcVertexGradient(
+typename SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::Vector
+SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::Cell::calcVertexGradient(
 	int vertexIndex,
 	const ScalarExtractorParam& extractor) const
 	{
@@ -532,11 +532,11 @@ SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::reserveCells(
 	gridCells.reserve(numCells);
 	}
 
-template <class ScalarParam,int dimensionParam,class ValueScalarParam>
+template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
-typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::VertexID
-SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::addVertex(
-	const typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::Point& vertexPosition)
+typename SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::VertexID
+SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::addVertex(
+	const typename SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::Point& vertexPosition)
 	{
 	/* Create a new vertex: */
 	VertexIndex vertexIndex=gridVertices.size();
@@ -546,11 +546,11 @@ SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::addVertex(
 	return VertexID(vertexIndex);
 	}
 
-template <class ScalarParam,int dimensionParam,class ValueScalarParam>
+template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
-typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::CellID
-SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::addCell(
-	const typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::VertexID cellVertices[])
+typename SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::CellID
+SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::addCell(
+	const typename SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::VertexID cellVertices[])
 	{
 	/* Create a new grid cell: */
 	GridCell newCell;
@@ -623,13 +623,13 @@ SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::addSlice(
 	return numSlices-1;
 	}
 
-template <class ScalarParam,int dimensionParam,class ValueScalarParam>
+template <class ScalarParam,int dimensionParam,class ValueParam>
 inline
 void
-SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::setVertexValue(
+SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::setVertexValue(
 	int sliceIndex,
-	typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::VertexIndex vertexIndex,
-	typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::ValueScalar newValue)
+	typename SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::VertexIndex vertexIndex,
+	typename SlicedHexahedral<ScalarParam,dimensionParam,ValueParam>::ValueScalar newValue)
 	{
 	/* Ensure that there is enough room in the slice arrays: */
 	if(allocatedSliceSize<=vertexIndex)
@@ -714,19 +714,6 @@ void
 SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::setLocatorEpsilon(
 	typename SlicedHexahedral<ScalarParam,dimensionParam,ValueScalarParam>::Scalar newLocatorEpsilon)
 	{
-   /* Check the desired locator epsilon against the minimal achievable, given Scalar's limited accuracy: */
-   Scalar maxAbsCoordinate=Scalar(0);
-   for(int i=0;i<dimension;++i)
-      {
-      if(maxAbsCoordinate<Math::abs(domainBox.min[i]))
-         maxAbsCoordinate=Math::abs(domainBox.min[i]);
-      if(maxAbsCoordinate<Math::abs(domainBox.max[i]))
-         maxAbsCoordinate=Math::abs(domainBox.max[i]);
-      }
-   Scalar minLocatorEpsilon=maxAbsCoordinate*Scalar(4)*Math::Constants<Scalar>::epsilon;
-   if(newLocatorEpsilon<minLocatorEpsilon)
-      newLocatorEpsilon=minLocatorEpsilon;
-
 	locatorEpsilon=newLocatorEpsilon;
 	}
 

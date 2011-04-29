@@ -164,7 +164,6 @@ class GridRenderer<ScalarParam,3,ValueParam>
 		}
 	inline static void renderGridFaces(const DataSet& dataSet)
 		{
-      std::cout<<"HELLO\n"<<std::flush;
 		/* Render all grid cell faces that do not have neighbours: */
 		for(CellIterator cIt=dataSet.beginCells();cIt!=dataSet.endCells();++cIt)
 			for(int faceIndex=0;faceIndex<DataSet::CellTopology::numFaces;++faceIndex)

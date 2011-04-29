@@ -577,9 +577,9 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
 
    /* Load all grid cells into the dataset: */
    std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;
+   DS::VertexID* cellVertices=new DS::VertexID[connDims[1]];
    for(int conn_I=0;conn_I<connDims[0];++conn_I)
       {
-      DS::VertexID* cellVertices=new DS::VertexID[connDims[1]];
       for( int conn_J=0;conn_J<connDims[1];++conn_J)
          cellVertices[conn_J]=DS::VertexID(connValues[(conn_I*connDims[1])+conn_J]);
       dataSet.addCell(cellVertices);
@@ -594,6 +594,8 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    std::cout<<" (DONE)"<<std::endl;
    
    /* Free used data structures: */
+   delete[] vertexIndices;
+   delete[] cellVertices;
    delete[] scalarSliceIndices;
    delete[] vectorSliceIndices;
    delete[] vertValues;

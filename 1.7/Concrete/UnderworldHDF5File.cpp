@@ -323,6 +323,7 @@ void readFieldValues(
          if(fieldType==VECTOR)
             dataSet.setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+3],vertexIndices[field_J],vector.mag());
          }
+      if(offset>1)
          sliceOffset+=offset;
 
       /* Free temporary buffer: */

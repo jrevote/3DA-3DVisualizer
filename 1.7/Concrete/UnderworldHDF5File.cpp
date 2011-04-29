@@ -214,7 +214,7 @@ void getFieldColumnCount(const char* fieldFileName,int& numFields,hsize_t vertDi
    }
 
 void readFieldValues(
-   UnderworldHDF5File::DS* dataSet,
+   DS& dataSet,
    DataValue& dataValue,
    std::vector<std::string> fieldFileNames,
    hsize_t vertDims[],
@@ -309,16 +309,16 @@ void readFieldValues(
             switch(fieldType)
                {
                case SCALAR:
-                  dataSet->setVertexValue(sliceIndices[sliceOffset+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[start+field_K]));
+                  dataSet.setVertexValue(sliceIndices[sliceOffset+field_K],vertexIndices[field_J],DS::ValueScalar(fieldBuffer[start+field_K]));
                   break;
                case VECTOR:
                   vector[field_K]=DS::ValueScalar(fieldBuffer[start+field_K]);
-                  dataSet->setVertexValue(sliceIndices[sliceOffset*VECTOR_COMPONENT_COUNT+field_K],vertexIndices[field_J],vector[field_K]);
+                  dataSet.setVertexValue(sliceIndices[sliceOffset*VECTOR_COMPONENT_COUNT+field_K],vertexIndices[field_J],vector[field_K]);
                   break;
                } 
             }
          if(fieldType==VECTOR)
-            dataSet->setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+3],vertexIndices[field_J],vector.mag());
+            dataSet.setVertexValue(sliceIndices[field_I*VECTOR_COMPONENT_COUNT+3],vertexIndices[field_J],vector.mag());
          }
          sliceOffset+=offset;
 
@@ -570,10 +570,10 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    std::cout<<"------Number of vertices loaded: "<<dataSet.getTotalNumVertices()<<"\n"<<std::flush;
 
    /* Get scalar values from each of the scalar field files: */
-   readFieldValues(&dataSet,dataValue,scalarFileNames,vertDims,scalarSliceIndices,vertexIndices,SCALAR);
+   readFieldValues(dataSet,dataValue,scalarFileNames,vertDims,scalarSliceIndices,vertexIndices,SCALAR);
 
    /* Get vector values from each of the vector field files: */
-   readFieldValues(&dataSet,dataValue,vectorFileNames,vertDims,vectorSliceIndices,vertexIndices,VECTOR);
+   readFieldValues(dataSet,dataValue,vectorFileNames,vertDims,vectorSliceIndices,vertexIndices,VECTOR);
 
    /* Load all grid cells into the dataset: */
    std::cout<<"---Loading Grid Cells into 3DVisualizer...\n"<<std::flush;

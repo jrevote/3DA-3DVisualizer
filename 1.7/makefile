@@ -40,7 +40,7 @@ VRUIDIR = /usr/local/packages/Vrui-1.0-068
 INSTALLDIR = /usr/local/packages/3DVisualizer-1.7
 
 # List of default visualization modules:
-#MODULE_NAMES = SphericalASCIIFile \
+MODULE_NAMES = SphericalASCIIFile \
                StructuredGridASCII \
                StructuredGridVTK \
                CitcomCUCartesianRawFile \
@@ -55,17 +55,10 @@ INSTALLDIR = /usr/local/packages/3DVisualizer-1.7
                UnstructuredPlot3DFile \
                ImageStack \
                MultiChannelImageStack \
-               StructuredGocadFile \
                StructuredCloudFile \
-               SphericalCloudFile \
-               CloudFile \
-               XDMFFile \
-               UnderworldHDF5File
+               UnderworldHDF5File \
+               #XDMFFile \
                #FITSFile 
-
-MODULE_NAMES = CitcomCUCartesianRawFile \
-               StructuredCloudFile \
-               UnderworldHDF5File 
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them

@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #ifndef VISUALIZATION_CONCRETE_UNDERWORLDHDF5FILE_INCLUDED
 #define VISUALIZATION_CONCRETE_UNDERWORLDHDF5FILE_INCLUDED
 
-#include <Wrappers/SlicedHexahedralIncludes.h>
+#include <Wrappers/SlicedHypercubicIncludes.h>
 #include <Wrappers/SlicedScalarVectorDataValue.h>
 
 #include <Wrappers/Module.h>
@@ -37,7 +37,7 @@ namespace {
 /* Basic type declarations: */
 typedef float Scalar; // Scalar type of data set domain
 typedef float VScalar; // Scalar type of data set value
-typedef Visualization::Templatized::SlicedHexahedral<Scalar,3,VScalar> DS; // Templatized data set type
+typedef Visualization::Templatized::SlicedHypercubic<Scalar,3,VScalar> DS; // Templatized data set type
 typedef Visualization::Wrappers::SlicedScalarVectorDataValue<DS,VScalar> DataValue; // Type of data value descriptor
 typedef Visualization::Wrappers::Module<DS,DataValue> BaseModule; // Module base class type
 

@@ -291,6 +291,7 @@ GLMotif::Popup* Visualizer::createStandardSaturationPalettesMenu(void)
 	standardSaturationPalettes->addEntry("Blue -> Yellow");
 	standardSaturationPalettes->addEntry("Magenta -> Green");
 	standardSaturationPalettes->addEntry("Rainbow");
+	standardSaturationPalettes->addEntry("Cool -> Warm");
 	
 	standardSaturationPalettes->getEntrySelectCallbacks().add(this,&Visualizer::createStandardSaturationPaletteCallback);
 	

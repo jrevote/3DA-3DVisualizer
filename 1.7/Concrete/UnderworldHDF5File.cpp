@@ -417,7 +417,11 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Make sure that the mesh file is valid: */
    if(meshFile<0)
       Misc::throwStdErr("UnderworldHDF5File::load: Invalid mesh file provided.");
+   #if(H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 8) || H5Gopen_vers == 1
    hid_t meshGroupID=H5Gopen(meshFile,"/");
+   #else
+   hid_t meshGroupID=H5Gopen(meshFile,"/",H5P_DEFAULT);
+   #endif
    H5O_info_t meshInfo;
    /* Retrieve standard information from the mesh: */
    H5Oget_info(meshGroupID,&meshInfo);

@@ -200,7 +200,6 @@ TEMPLATIZED_SOURCES = Templatized/Simplex.cpp \
                       Templatized/SliceCaseTableTesseract.cpp \
                       Templatized/IsosurfaceCaseTableSimplex.cpp \
                       Templatized/IsosurfaceCaseTableTesseract.cpp \
-                      Templatized/Hexahedral.cpp \
                       Templatized/SliceCaseTableHexahedral.cpp \
                       Templatized/IsosurfaceCaseTableHexahedral.cpp 
 

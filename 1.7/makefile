@@ -199,9 +199,7 @@ TEMPLATIZED_SOURCES = Templatized/Simplex.cpp \
                       Templatized/SliceCaseTableSimplex.cpp \
                       Templatized/SliceCaseTableTesseract.cpp \
                       Templatized/IsosurfaceCaseTableSimplex.cpp \
-                      Templatized/IsosurfaceCaseTableTesseract.cpp \
-                      Templatized/SliceCaseTableHexahedral.cpp \
-                      Templatized/IsosurfaceCaseTableHexahedral.cpp 
+                      Templatized/IsosurfaceCaseTableTesseract.cpp 
 
 WRAPPERS_SOURCES = Wrappers/ParametersIOHelper.cpp \
                    Wrappers/RenderArrow.cpp \

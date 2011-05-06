@@ -25,7 +25,6 @@
 # same setting in Vrui's makefile. By default the directories match; if
 # the installation directory was adjusted during Vrui's installation, it
 # must be adjusted here as well.
-#VRUIDIR = /home/jrevote/Documents/Projects/3D-Alive/Development/Builds/Vrui-1.0-068
 VRUIDIR = /usr/local/packages/Vrui-1.0-068
 
 # Base installation directory for 3D Visualizer and its module
@@ -56,7 +55,7 @@ MODULE_NAMES = SphericalASCIIFile \
                ImageStack \
                MultiChannelImageStack \
                StructuredCloudFile \
-               UnderworldHDF5File \
+               UnderworldHDF5File 
                #XDMFFile \
                #FITSFile 
 
@@ -131,8 +130,6 @@ endif
 
 # Add base directory to include path:
 CFLAGS += -I.
-
-CFLAGS += -I/usr/local/packages/xdmf-gcc-4.4.1/include
 
 # Pattern rule to compile C++ sources:
 $(OBJDIR)/%.o: %.cpp
@@ -282,10 +279,6 @@ $(call PLUGINNAME,UnstructuredHexahedralTecplotASCIIFile): $(OBJDIR)/Concrete/Te
                                                            $(OBJDIR)/Concrete/UnstructuredHexahedralTecplotASCIIFile.o
 
 $(call PLUGINNAME,MultiChannelImageStack): PACKAGES += MYIMAGES
-
-$(call PLUGINNAME,XDMFFile): PACKAGES += MYFILES
-
-$(call PLUGINNAME,FITSFile): PACKAGES += MYFILES
 
 $(call PLUGINNAME,DicomImageStack): $(OBJDIR)/Concrete/DicomImageStack.o \
                                     $(OBJDIR)/Concrete/DicomImageFile.o

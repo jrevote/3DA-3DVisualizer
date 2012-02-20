@@ -68,6 +68,7 @@ MODULE_NAMES = SphericalASCIIFile \
                ImageStack \
                DicomImageStack \
                MultiChannelImageStack \
+               GocadVoxetFile \
                StructuredCloudFile \
                UnderworldHDF5File
 
@@ -76,7 +77,6 @@ MODULE_NAMES = SphericalASCIIFile \
 UNSUPPORTED_MODULE_NAMES = AnalyzeFile \
                            ByteVolFile \
                            GaleFEMVectorFile \
-                           GocadVoxetFile \
                            ConvectionFile \
                            ConvectionFileCartesian \
                            CSConvectionFile \

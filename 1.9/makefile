@@ -26,7 +26,7 @@
 # directory was changed during Vrui's installation, the directory below
 # must be adapted.
 #VRUI_MAKEDIR := $(HOME)/Vrui-2.2/share/make
-VRUI_MAKEDIR := /usr/local/packages/vrui/2.2-003/share/make
+VRUI_MAKEDIR := /usr/local/packages/Vrui/2.2-003/share/make
 
 # Base installation directory for 3D Visualizer and its module
 # plug-ins. The module plug-ins cannot be moved from this location
@@ -38,7 +38,7 @@ VRUI_MAKEDIR := /usr/local/packages/vrui/2.2-003/share/make
 # Important note: Do not use ~ as an abbreviation for the user's home
 # directory here; use $(HOME) instead.
 #INSTALLDIR := $(shell pwd)
-INSTALLDIR := /usr/local/packages/3dvisualizer/1.9
+INSTALLDIR := /usr/local/packages/3DVisualizer/1.9
 
 # Flag whether to use GLSL shaders instead of fixed OpenGL functionality
 # for some visualization algorithms, especially volume rendering. This
@@ -50,7 +50,7 @@ USE_SHADERS = 1
 # spatially distributed shared data exploration. If the Vrui
 # Collaboration Infrastructure is not installed on the host system, this
 # flag will be ignored.
-USE_COLLABORATION = 1
+USE_COLLABORATION = 0
 
 # List of default visualization modules:
 MODULE_NAMES = SphericalASCIIFile \

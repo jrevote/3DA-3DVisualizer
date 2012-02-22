@@ -460,6 +460,11 @@ void VariableManager::createPalette(int newPaletteType)
 			controlPoints.push_back(ControlPoint(o+f*(5.0/5.0),Color(1.0f,0.148f,1.0f,(5.0f/5.0f))));
 			break;
 			}
+
+      case COOL_TO_WARM:
+         controlPoints.push_back(ControlPoint(valueRange.first,Color(0.231373f,0.298039f,0.752941f,0.0f)));
+         controlPoints.push_back(ControlPoint(valueRange.second,Color(0.705882f,0.0156863f,0.14902f,1.0f)));
+         break;
 		
 		default:
 			createPalette=false;

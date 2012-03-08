@@ -56,6 +56,9 @@ class GridRenderer<2,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+      {
+      }
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_LOOP);
@@ -135,6 +138,9 @@ class GridRenderer<3,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+      {
+      }
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_STRIP);
@@ -350,7 +356,7 @@ inline
 CloudGridRenderer<DataSetParam>::CloudGridRenderer(
 	const typename CloudGridRenderer<DataSetParam>::DataSet* sDataSet)
 	:dataSet(sDataSet),
-	 renderingModeIndex(0)
+	 renderingModeIndex(1)
 	{
 	}
 
@@ -360,7 +366,7 @@ int
 CloudGridRenderer<DataSetParam>::getNumRenderingModes(
 	void)
 	{
-	return 5;
+	return 6;
 	}
 
 template <class DataSetParam>
@@ -369,12 +375,12 @@ const char*
 CloudGridRenderer<DataSetParam>::getRenderingModeName(
 	int renderingModeIndex)
 	{
-	if(renderingModeIndex<0||renderingModeIndex>=5)
+	if(renderingModeIndex<0||renderingModeIndex>=6)
 		Misc::throwStdErr("CloudGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
-	static const char* renderingModeNames[5]=
+	static const char* renderingModeNames[6]=
 		{
-		"Bounding Box","Grid Outline","Grid Faces","Grid Cells", "Point Set"
+		"None", "Bounding Box","Grid Outline","Grid Faces","Grid Cells", "Point Set"
 		};
 	
 	return renderingModeNames[renderingModeIndex];
@@ -386,7 +392,7 @@ void
 CloudGridRenderer<DataSetParam>::setRenderingMode(
 	int newRenderingModeIndex)
 	{
-	if(newRenderingModeIndex<0||newRenderingModeIndex>=5)
+	if(newRenderingModeIndex<0||newRenderingModeIndex>=6)
 		Misc::throwStdErr("CloudGridRenderer::setRenderingMode: invalid rendering mode index %d",newRenderingModeIndex);
 	
 	renderingModeIndex=newRenderingModeIndex;
@@ -401,26 +407,31 @@ CloudGridRenderer<DataSetParam>::glRenderAction(
 	switch(renderingModeIndex)
 		{
 		case 0:
+			/* Hide the grid's bounding box: */
+			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderNone(dataSet->getDomainBox());
+			break;
+
+		case 1:
 			/* Render the grid's bounding box: */
 			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderBoundingBox(dataSet->getDomainBox());
 			break;
 			
-		case 1:
+		case 2:
 			/* Render the grid's outline: */
 			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridOutline(dataSet);
 			break;
 		
-		case 2:
+		case 3:
 			/* Render the grid's faces: */
 			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridFaces(dataSet);
 			break;
 		
-		case 3:
+		case 4:
 			/* Render the grid's cells: */
 			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridCells(dataSet);
          break;
 
-		case 4:
+		case 5:
 			/* Render the grid's cells: */
 			CloudGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderPointSet(dataSet);
 			break;

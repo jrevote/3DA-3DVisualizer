@@ -56,6 +56,9 @@ class GridRenderer<2,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+      {
+      }
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_LOOP);
@@ -135,6 +138,9 @@ class GridRenderer<3,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+      {
+      }
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_STRIP);
@@ -317,7 +323,7 @@ inline
 CurvilinearGridRenderer<DataSetParam>::CurvilinearGridRenderer(
 	const typename CurvilinearGridRenderer<DataSetParam>::DataSet* sDataSet)
 	:dataSet(sDataSet),
-	 renderingModeIndex(0)
+	 renderingModeIndex(1)
 	{
 	}
 
@@ -327,7 +333,7 @@ int
 CurvilinearGridRenderer<DataSetParam>::getNumRenderingModes(
 	void)
 	{
-	return 4;
+	return 5;
 	}
 
 template <class DataSetParam>
@@ -336,12 +342,12 @@ const char*
 CurvilinearGridRenderer<DataSetParam>::getRenderingModeName(
 	int renderingModeIndex)
 	{
-	if(renderingModeIndex<0||renderingModeIndex>=4)
+	if(renderingModeIndex<0||renderingModeIndex>=5)
 		Misc::throwStdErr("CurvilinearGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
-	static const char* renderingModeNames[4]=
+	static const char* renderingModeNames[5]=
 		{
-		"Bounding Box","Grid Outline","Grid Faces","Grid Cells"
+		"None", "Bounding Box","Grid Outline","Grid Faces","Grid Cells"
 		};
 	
 	return renderingModeNames[renderingModeIndex];
@@ -353,7 +359,7 @@ void
 CurvilinearGridRenderer<DataSetParam>::setRenderingMode(
 	int newRenderingModeIndex)
 	{
-	if(newRenderingModeIndex<0||newRenderingModeIndex>=4)
+	if(newRenderingModeIndex<0||newRenderingModeIndex>=5)
 		Misc::throwStdErr("CurvilinearGridRenderer::setRenderingMode: invalid rendering mode index %d",newRenderingModeIndex);
 	
 	renderingModeIndex=newRenderingModeIndex;
@@ -369,20 +375,25 @@ CurvilinearGridRenderer<DataSetParam>::glRenderAction(
 		{
 		case 0:
 			/* Render the grid's bounding box: */
+			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderNone(dataSet->getDomainBox());
+			break;
+
+		case 1:
+			/* Render the grid's bounding box: */
 			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderBoundingBox(dataSet->getDomainBox());
 			break;
 			
-		case 1:
+		case 2:
 			/* Render the grid's outline: */
 			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridOutline(dataSet);
 			break;
 		
-		case 2:
+		case 3:
 			/* Render the grid's faces: */
 			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridFaces(dataSet);
 			break;
 		
-		case 3:
+		case 4:
 			/* Render the grid's cells: */
 			CurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridCells(dataSet);
 			break;

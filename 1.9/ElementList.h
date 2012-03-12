@@ -74,6 +74,8 @@ class ElementList
 	GLMotif::PopupWindow* elementListDialogPopup; // Dialog listing visualization elements
 	GLMotif::ListBox* elementList; // List box widget containing the names of all visualization elements
 	GLMotif::ToggleButton* showElementToggle; // Toggle button to set the visibility of a visualization element
+	GLMotif::Button* showAllElementsToggle; // Button to show all visualization elements
+	GLMotif::Button* hideAllElementsToggle; // Button to hide all visualization elements
 	GLMotif::ToggleButton* showElementSettingsToggle; // Toggle button to show or hide a visualization element's settings dialog
 	
 	/* Private methods: */
@@ -81,6 +83,8 @@ class ElementList
 	void elementListValueChangedCallback(GLMotif::ListBox::ValueChangedCallbackData* cbData);
 	void elementListItemSelectedCallback(GLMotif::ListBox::ItemSelectedCallbackData* cbData);
 	void showElementToggleValueChangedCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
+	void showAllElementsSelectedCallback(GLMotif::Button::SelectCallbackData* CallbackData);
+	void hideAllElementsSelectedCallback(GLMotif::Button::SelectCallbackData* CallbackData);
 	void showElementSettingsToggleValueChangedCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
 	void elementSettingsCloseCallback(Misc::CallbackData* cbData);
 	void deleteElementSelectedCallback(Misc::CallbackData* cbData);

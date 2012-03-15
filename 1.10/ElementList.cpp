@@ -89,6 +89,22 @@ void ElementList::showElementToggleValueChangedCallback(GLMotif::ToggleButton::V
 		cbData->toggle->setToggle(false);
 	}
 
+void ElementList::showAllElementsSelectedCallback(GLMotif::Button::SelectCallbackData* CallbackData)
+	{
+   for(int element_I=0;element_I<elementList->getNumItems();element_I++)
+      {
+		elements[element_I].show=true;
+      }
+	}
+
+void ElementList::hideAllElementsSelectedCallback(GLMotif::Button::SelectCallbackData* CallbackData)
+	{
+   for(int element_I=0;element_I<elementList->getNumItems();element_I++)
+      {
+		elements[element_I].show=false;
+      }
+	}
+
 void ElementList::showElementSettingsToggleValueChangedCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)
 	{
 	int selectedElementIndex=elementList->getSelectedItem();
@@ -185,6 +201,12 @@ ElementList::ElementList(GLMotif::WidgetManager* sWidgetManager)
 	
 	showElementToggle=new GLMotif::ToggleButton("ShowElementToggle",buttonBox,"Show");
 	showElementToggle->getValueChangedCallbacks().add(this,&ElementList::showElementToggleValueChangedCallback);
+
+	showAllElementsToggle=new GLMotif::Button("ShowAllElementsToggle",buttonBox,"Show All");
+	showAllElementsToggle->getSelectCallbacks().add(this,&ElementList::showAllElementsSelectedCallback);
+
+	hideAllElementsToggle=new GLMotif::Button("HideAllElementsToggle",buttonBox,"Hide All");
+	hideAllElementsToggle->getSelectCallbacks().add(this,&ElementList::hideAllElementsSelectedCallback);
 	
 	showElementSettingsToggle=new GLMotif::ToggleButton("ShowElementSettingsToggle",buttonBox,"Show Settings");
 	showElementSettingsToggle->getValueChangedCallbacks().add(this,&ElementList::showElementSettingsToggleValueChangedCallback);

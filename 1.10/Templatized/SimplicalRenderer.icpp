@@ -54,6 +54,9 @@ class GridRenderer<ScalarParam,2,ValueParam>
 	typedef typename DataSet::CellIterator CellIterator;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+		{
+		}
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_LOOP);
@@ -121,6 +124,9 @@ class GridRenderer<ScalarParam,3,ValueParam>
 	typedef typename DataSet::CellIterator CellIterator;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+		{
+		}
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_STRIP);
@@ -220,7 +226,7 @@ inline
 DataSetRenderer<Simplical<ScalarParam,dimensionParam,ValueParam> >::DataSetRenderer(
 	const typename DataSetRenderer<Simplical<ScalarParam,dimensionParam,ValueParam> >::DataSet* sDataSet)
 	:dataSet(sDataSet),
-	 renderingModeIndex(0)
+	 renderingModeIndex(1)
 	{
 	}
 
@@ -238,7 +244,7 @@ int
 DataSetRenderer<Simplical<ScalarParam,dimensionParam,ValueParam> >::getNumRenderingModes(
 	void)
 	{
-	return 4;
+	return 5;
 	}
 
 template <class ScalarParam,int dimensionParam,class ValueParam>
@@ -250,9 +256,9 @@ DataSetRenderer<Simplical<ScalarParam,dimensionParam,ValueParam> >::getRendering
 	if(renderingModeIndex<0||renderingModeIndex>=4)
 		Misc::throwStdErr("DataSetRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
-	static const char* renderingModeNames[4]=
+	static const char* renderingModeNames[5]=
 		{
-		"Bounding Box","Grid Outline","Grid Faces","Grid Cells"
+		"Hide Grid","Bounding Box","Grid Outline","Grid Faces","Grid Cells"
 		};
 	
 	return renderingModeNames[renderingModeIndex];
@@ -280,20 +286,25 @@ DataSetRenderer<Simplical<ScalarParam,dimensionParam,ValueParam> >::glRenderActi
 		{
 		case 0:
 			/* Render the grid's bounding box: */
+			SimplicalRendererImplementation::GridRenderer<ScalarParam,dimensionParam,ValueParam>::renderNone(dataSet->getDomainBox());
+			break;
+
+		case 1:
+			/* Render the grid's bounding box: */
 			SimplicalRendererImplementation::GridRenderer<ScalarParam,dimensionParam,ValueParam>::renderBoundingBox(dataSet->getDomainBox());
 			break;
 		
-		case 1:
+		case 2:
 			/* Render the grid's outline: */
 			SimplicalRendererImplementation::GridRenderer<ScalarParam,dimensionParam,ValueParam>::renderGridOutline(*dataSet);
 			break;
 		
-		case 2:
+		case 3:
 			/* Render the grid's faces: */
 			SimplicalRendererImplementation::GridRenderer<ScalarParam,dimensionParam,ValueParam>::renderGridFaces(*dataSet);
 			break;
 		
-		case 3:
+		case 4:
 			/* Render the grid's cells: */
 			SimplicalRendererImplementation::GridRenderer<ScalarParam,dimensionParam,ValueParam>::renderGridCells(*dataSet);
 			break;

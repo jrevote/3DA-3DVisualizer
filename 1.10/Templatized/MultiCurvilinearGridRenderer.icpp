@@ -58,6 +58,9 @@ class GridRenderer<2,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+		{
+		}
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_LOOP);
@@ -172,6 +175,9 @@ class GridRenderer<3,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Box& box)
+		{
+		}
 	inline static void renderBoundingBox(const Box& box)
 		{
 		glBegin(GL_LINE_STRIP);
@@ -366,7 +372,7 @@ inline
 MultiCurvilinearGridRenderer<DataSetParam>::MultiCurvilinearGridRenderer(
 	const typename MultiCurvilinearGridRenderer<DataSetParam>::DataSet* sDataSet)
 	:dataSet(sDataSet),
-	 renderingModeIndex(0)
+	 renderingModeIndex(1)
 	{
 	}
 
@@ -376,7 +382,7 @@ int
 MultiCurvilinearGridRenderer<DataSetParam>::getNumRenderingModes(
 	void)
 	{
-	return 5;
+	return 6;
 	}
 
 template <class DataSetParam>
@@ -385,12 +391,12 @@ const char*
 MultiCurvilinearGridRenderer<DataSetParam>::getRenderingModeName(
 	int renderingModeIndex)
 	{
-	if(renderingModeIndex<0||renderingModeIndex>=5)
+	if(renderingModeIndex<0||renderingModeIndex>=6)
 		Misc::throwStdErr("MultiCurvilinearGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
-	static const char* renderingModeNames[5]=
+	static const char* renderingModeNames[6]=
 		{
-		"Bounding Box","Grid Outline","Grid Boundary Faces","Grid Faces","Grid Cells"
+		"Hide Grid","Bounding Box","Grid Outline","Grid Boundary Faces","Grid Faces","Grid Cells"
 		};
 	
 	return renderingModeNames[renderingModeIndex];
@@ -418,16 +424,21 @@ MultiCurvilinearGridRenderer<DataSetParam>::glRenderAction(
 		{
 		case 0:
 			/* Render the grid's bounding box: */
+			MultiCurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderNone(dataSet->getDomainBox());
+			break;
+
+		case 1:
+			/* Render the grid's bounding box: */
 			MultiCurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderBoundingBox(dataSet->getDomainBox());
 			break;
 			
-		case 1:
+		case 2:
 			/* Render each grid's outline: */
 			for(int gridIndex=0;gridIndex<dataSet->getNumGrids();++gridIndex)
 				MultiCurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridOutline(dataSet->getGrid(gridIndex));
 			break;
 		
-		case 2:
+		case 3:
 			/* Render the grid's boundary faces: */
 			for(int gridIndex=0;gridIndex<dataSet->getNumGrids();++gridIndex)
 				{
@@ -439,13 +450,13 @@ MultiCurvilinearGridRenderer<DataSetParam>::glRenderAction(
 				}
 			break;
 		
-		case 3:
+		case 4:
 			/* Render the grid's faces: */
 			for(int gridIndex=0;gridIndex<dataSet->getNumGrids();++gridIndex)
 				MultiCurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridFaces(dataSet->getGrid(gridIndex),~0x0);
 			break;
 		
-		case 4:
+		case 5:
 			/* Render the grid's cells: */
 			for(int gridIndex=0;gridIndex<dataSet->getNumGrids();++gridIndex)
 				MultiCurvilinearGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridCells(dataSet->getGrid(gridIndex));

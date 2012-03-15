@@ -56,6 +56,9 @@ class GridRenderer<2,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Size& cellSize,const Index& numCells)
+		{
+		}
 	inline static void renderGridOutline(const Size& cellSize,const Index& numCells)
 		{
 		/* Calculate total grid size: */
@@ -142,6 +145,9 @@ class GridRenderer<3,DataSetParam>
 	typedef typename DataSet::Cell Cell;
 	
 	/* Methods: */
+	inline static void renderNone(const Size& cellSize,const Index& numCells)
+		{
+		}
 	inline static void renderGridOutline(const Size& cellSize,const Index& numCells)
 		{
 		/* Calculate total grid size: */
@@ -318,7 +324,7 @@ inline
 CartesianGridRenderer<DataSetParam>::CartesianGridRenderer(
 	const typename CartesianGridRenderer<DataSetParam>::DataSet* sDataSet)
 	:dataSet(sDataSet),
-	 renderingModeIndex(0)
+	 renderingModeIndex(1)
 	{
 	}
 
@@ -328,7 +334,7 @@ int
 CartesianGridRenderer<DataSetParam>::getNumRenderingModes(
 	void)
 	{
-	return 3;
+	return 4;
 	}
 
 template <class DataSetParam>
@@ -337,12 +343,12 @@ const char*
 CartesianGridRenderer<DataSetParam>::getRenderingModeName(
 	int renderingModeIndex)
 	{
-	if(renderingModeIndex<0||renderingModeIndex>=3)
+	if(renderingModeIndex<0||renderingModeIndex>=4)
 		Misc::throwStdErr("CartesianGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
-	static const char* renderingModeNames[3]=
+	static const char* renderingModeNames[4]=
 		{
-		"Grid Outline","Grid Faces","Grid Cells"
+		"Hide Grid", "Grid Outline","Grid Faces","Grid Cells"
 		};
 	
 	return renderingModeNames[renderingModeIndex];
@@ -369,16 +375,21 @@ CartesianGridRenderer<DataSetParam>::glRenderAction(
 	switch(renderingModeIndex)
 		{
 		case 0:
+			/* Hide grid: */
+			CartesianGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderNone(dataSet->getCellSize(),dataSet->getNumCells());
+			break;
+
+		case 1:
 			/* Render the grid's outline: */
 			CartesianGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridOutline(dataSet->getCellSize(),dataSet->getNumCells());
 			break;
 		
-		case 1:
+		case 2:
 			/* Render the grid's faces: */
 			CartesianGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridFaces(dataSet->getCellSize(),dataSet->getNumCells());
 			break;
 		
-		case 2:
+		case 3:
 			/* Render the grid's cells: */
 			CartesianGridRendererImplementation::GridRenderer<DataSetParam::dimension,DataSetParam>::renderGridCells(dataSet->getCellSize(),dataSet->getNumCells());
 			break;

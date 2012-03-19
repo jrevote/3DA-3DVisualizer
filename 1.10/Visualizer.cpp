@@ -314,6 +314,29 @@ GLMotif::Popup* Visualizer::createGocadPalettesMenu(void)
 	return gocadPalettesMenuPopup;
 	}
 
+GLMotif::Popup* Visualizer::createQualitativePalettesMenu(void)
+	{
+	GLMotif::Popup* qualitativePalettesMenuPopup=new GLMotif::Popup("QualitativePalettesMenuPopup",Vrui::getWidgetManager());
+	
+	/* Create the palette creation menu and add entries for all standard palettes: */
+	GLMotif::SubMenu* qualitativePalettes=new GLMotif::SubMenu("QualitativePalettes",qualitativePalettesMenuPopup,false);
+	
+	qualitativePalettes->addEntry("Qualitative 0");
+	qualitativePalettes->addEntry("Qualitative 1");
+	qualitativePalettes->addEntry("Qualitative 2");
+	qualitativePalettes->addEntry("Qualitative 3");
+	qualitativePalettes->addEntry("Qualitative 4");
+	qualitativePalettes->addEntry("Qualitative 5");
+	qualitativePalettes->addEntry("Qualitative 6");
+	qualitativePalettes->addEntry("Qualitative 7");
+	
+	qualitativePalettes->getEntrySelectCallbacks().add(this,&Visualizer::createQualitativePaletteCallback);
+	
+	qualitativePalettes->manageChild();
+	
+	return qualitativePalettesMenuPopup;
+	}
+
 GLMotif::Popup* Visualizer::createColorMenu(void)
 	{
 	GLMotif::Popup* colorMenuPopup=new GLMotif::Popup("ColorMenuPopup",Vrui::getWidgetManager());
@@ -329,6 +352,9 @@ GLMotif::Popup* Visualizer::createColorMenu(void)
 
 	GLMotif::CascadeButton* gocadPalettesCascade=new GLMotif::CascadeButton("GocadPalettesCascade",colorMenu,"Gocad Palette");
 	gocadPalettesCascade->setPopup(createGocadPalettesMenu());
+
+	GLMotif::CascadeButton* qualitativePalettesCascade=new GLMotif::CascadeButton("QualitativePalettesCascade",colorMenu,"Qualitative Palette");
+	qualitativePalettesCascade->setPopup(createQualitativePalettesMenu());
 	
 	GLMotif::Button* loadPaletteButton=new GLMotif::Button("LoadPaletteButton",colorMenu,"Load Palette File");
 	loadPaletteButton->getSelectCallbacks().add(this,&Visualizer::loadPaletteCallback);
@@ -1275,6 +1301,12 @@ void Visualizer::createGocadPaletteCallback(GLMotif::Menu::EntrySelectCallbackDa
 	{
 	if(!inLoadPalette)
 		variableManager->createPalette(VariableManager::GOCAD_AFRICA+cbData->menu->getEntryIndex(cbData->selectedButton));
+	}
+
+void Visualizer::createQualitativePaletteCallback(GLMotif::Menu::EntrySelectCallbackData* cbData)
+	{
+	if(!inLoadPalette)
+		variableManager->createPalette(VariableManager::QUALITATIVE_0+cbData->menu->getEntryIndex(cbData->selectedButton));
 	}
 
 void Visualizer::showElementListCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)

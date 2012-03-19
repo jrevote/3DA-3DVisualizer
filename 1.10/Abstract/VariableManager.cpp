@@ -575,6 +575,118 @@ void VariableManager::createPalette(int newPaletteType)
 			break;
 			}
 
+		case QUALITATIVE_0:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.498f,0.788f,0.502f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.745f,0.682f,0.831f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.992f,0.753f,0.525f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(1.000f,1.000f,0.600f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.220f,0.424f,0.690f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.941f,0.008f,0.498f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.749f,0.357f,0.090f,(6.0f/6.0f))));
+			break;
+			}
+
+		case QUALITATIVE_1:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.106f,0.620f,0.467f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.851f,0.373f,0.008f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.459f,0.439f,0.702f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.906f,0.161f,0.541f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.004f,0.651f,0.118f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.902f,0.671f,0.008f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.651f,0.463f,0.114f,(6.0f/6.0f))));
+			break;
+			}
+
+		case QUALITATIVE_2:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.651f,0.808f,0.890f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.122f,0.471f,0.706f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.698f,0.875f,0.541f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.200f,0.627f,0.173f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.984f,0.604f,0.600f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.890f,0.102f,0.110f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.992f,0.749f,0.435f,(6.0f/6.0f))));
+			break;
+			}
+
+		case QUALITATIVE_3:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.984f,0.706f,0.682f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.702f,0.801f,0.890f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.800f,0.922f,0.773f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.871f,0.796f,0.894f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.996f,0.851f,0.651f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(1.000f,1.000f,0.800f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.898f,0.847f,0.741f,(6.0f/6.0f))));
+			break;
+			}
+
+		case QUALITATIVE_4:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.702f,0.886f,0.804f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.992f,0.804f,0.675f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.796f,0.835f,0.910f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.957f,0.792f,0.894f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.902f,0.961f,0.788f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(1.000f,0.949f,0.682f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.945f,0.886f,0.804f,(6.0f/6.0f))));
+			break;
+			}
+
+		case QUALITATIVE_5:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.894f,0.102f,0.110f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.216f,0.494f,0.722f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.302f,0.686f,0.290f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.596f,0.306f,0.639f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(1.000f,0.498f,0.000f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(1.000f,1.000f,0.200f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.651f,0.337f,0.157f,(6.0f/6.0f))));
+			break;
+			}
+
+		case QUALITATIVE_6:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.400f,0.761f,0.647f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.988f,0.553f,0.384f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.553f,0.627f,0.796f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.906f,0.541f,0.764f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.651f,0.847f,0.329f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(1.000f,0.851f,0.184f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.898f,0.769f,0.580f,(6.0f/6.0f))));
+			break;
+			}
+
+		case QUALITATIVE_7:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.553f,0.827f,0.780f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(1.000f,1.000f,0.702f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.745f,0.729f,0.855f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.984f,0.502f,0.447f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.502f,0.694f,0.827f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.992f,0.706f,0.384f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.702f,0.871f,0.413f,(6.0f/6.0f))));
+			break;
+			}
+
 		default:
 			createPalette=false;
 		}

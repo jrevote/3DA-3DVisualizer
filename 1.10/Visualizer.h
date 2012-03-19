@@ -148,6 +148,7 @@ class Visualizer:public Vrui::Application
 	GLMotif::Popup* createStandardLuminancePalettesMenu(void);
 	GLMotif::Popup* createStandardSaturationPalettesMenu(void);
 	GLMotif::Popup* createGocadPalettesMenu(void);
+	GLMotif::Popup* createQualitativePalettesMenu(void);
 	GLMotif::Popup* createColorMenu(void);
 	GLMotif::PopupMenu* createMainMenu(void);
 	void loadElements(const char* elementFileName,bool ascii); // Loads all visualization elements defined in the given file
@@ -180,6 +181,7 @@ class Visualizer:public Vrui::Application
 	void createStandardLuminancePaletteCallback(GLMotif::Menu::EntrySelectCallbackData* cbData);
 	void createStandardSaturationPaletteCallback(GLMotif::Menu::EntrySelectCallbackData* cbData);
 	void createGocadPaletteCallback(GLMotif::Menu::EntrySelectCallbackData* cbData);
+	void createQualitativePaletteCallback(GLMotif::Menu::EntrySelectCallbackData* cbData);
 	void showElementListCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
 	void elementListClosedCallback(Misc::CallbackData* cbData);
 	void loadElementsCallback(Misc::CallbackData* cbData);

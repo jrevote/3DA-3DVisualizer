@@ -460,7 +460,121 @@ void VariableManager::createPalette(int newPaletteType)
 			controlPoints.push_back(ControlPoint(o+f*(5.0/5.0),Color(1.0f,0.148f,1.0f,(5.0f/5.0f))));
 			break;
 			}
+
+		case GOCAD_AFRICA:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/3.0),Color(0.804f,0.694f,0.451f,(0.0f/3.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/3.0),Color(1.0f,1.0f,0.0f,(1.0f/3.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/3.0),Color(0.0f,1.0f,0.0f,(2.0f/3.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/3.0),Color(1.0f,0.0f,0.0f,(3.0f/3.0f))));
+			break;
+			}
+
+		case GOCAD_BGR:
+			{
+			controlPoints.push_back(ControlPoint(valueRange.first,Color(0.0f,0.0f,1.0f,0.0f)));
+			controlPoints.push_back(ControlPoint(o+f*0.5,Color(0.0f,1.0f,0.0f,0.5f)));
+			controlPoints.push_back(ControlPoint(valueRange.second,Color(1.0f,0.0f,0.0f,1.0f)));
+			break;
+			}
+
+		case GOCAD_CLASSIC:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/4.0),Color(0.0f,0.0f,1.0f,(0.0f/4.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/4.0),Color(0.0f,1.0f,1.0f,(1.0f/4.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/4.0),Color(0.0f,1.0f,0.0f,(2.0f/4.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/4.0),Color(1.0f,1.0f,0.0f,(3.0f/4.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/4.0),Color(1.0f,0.0f,0.0f,(4.0f/4.0f))));
+			break;
+			}
+
+		case GOCAD_FLAG:
+			{
+			controlPoints.push_back(ControlPoint(valueRange.first,Color(0.0f,0.0f,1.0f,0.0f)));
+			controlPoints.push_back(ControlPoint(o+f*0.5,Color(1.0f,1.0f,1.0f,0.5f)));
+			controlPoints.push_back(ControlPoint(valueRange.second,Color(1.0f,0.0f,0.0f,1.0f)));
+			break;
+			}
+
+		case GOCAD_FLUIDS:
+			{
+			controlPoints.push_back(ControlPoint(valueRange.first,Color(0.612f,0.906f,1.0f,0.0f)));
+			controlPoints.push_back(ControlPoint(o+f*0.5,Color(0.514f,0.776f,0.286f,0.5f)));
+			controlPoints.push_back(ControlPoint(valueRange.second,Color(0.929f,0.220f,0.290f,1.0f)));
+			break;
+			}
 		
+		case GOCAD_GREEN_YELLOW:
+         {
+			controlPoints.push_back(ControlPoint(valueRange.first,Color(0.0f,1.0f,0.0f,0.0f)));
+			controlPoints.push_back(ControlPoint(valueRange.second,Color(1.0f,1.0f,0.0f,1.0f)));
+			break;
+         }
+
+		case GOCAD_RAINBOW_0:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.0f,0.0f,0.0f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.0f,0.298f,1.0f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.0f,1.0f,0.282f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(1.0f,1.0f,0.0f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(1.0f,0.482f,0.0f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(1.0f,0.0f,0.0f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(1.0f,1.0f,1.0f,(6.0f/6.0f))));
+			break;
+			}
+
+		case GOCAD_RAINBOW_1:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(1.0f,0.0f,0.0f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(1.0f,1.0f,0.0f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.0f,1.0f,0.0f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.0f,1.0f,1.0f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.0f,0.0f,1.0f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(1.0f,0.0f,1.0f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(1.0f,1.0f,1.0f,(6.0f/6.0f))));
+			break;
+			}
+
+		case GOCAD_RAINBOW_2:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/10.0),Color(0.004f,1.0f,0.004f,(0.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/10.0),Color(0.612f,0.008f,0.714f,(1.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/10.0),Color(1.0f,1.0f,0.008f,(2.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/10.0),Color(0.671f,0.008f,0.008f,(3.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/10.0),Color(0.635f,1.0f,0.624f,(4.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/10.0),Color(0.063f,0.031f,1.0f,(5.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/10.0),Color(1.0f,0.627f,0.820f,(6.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(7.0/10.0),Color(0.047f,1.0f,0.969f,(7.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(8.0/10.0),Color(0.012f,0.525f,0.012f,(8.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(9.0/10.0),Color(1.0f,0.008f,0.008f,(9.0f/10.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(10.0/10.0),Color(0.0f,0.0f,0.0f,(10.0f/10.0f))));
+			break;
+			}
+
+		case GOCAD_RED_BLUE:
+			{
+			controlPoints.push_back(ControlPoint(valueRange.first,Color(1.0f,0.0f,0.0f,0.0f)));
+			controlPoints.push_back(ControlPoint(valueRange.second,Color(0.0f,0.0f,1.0f,1.0f)));
+			break;
+			}
+
+		case GOCAD_WHITE_BLUE:
+			{
+			controlPoints.push_back(ControlPoint(valueRange.first,Color(1.0f,1.0f,1.0f,0.0f)));
+			controlPoints.push_back(ControlPoint(valueRange.second,Color(0.0f,0.0f,1.0f,1.0f)));
+			break;
+			}
+
 		default:
 			createPalette=false;
 		}

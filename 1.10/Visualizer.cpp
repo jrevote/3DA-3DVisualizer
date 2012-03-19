@@ -288,6 +288,32 @@ GLMotif::Popup* Visualizer::createStandardSaturationPalettesMenu(void)
 	return standardSaturationPalettesMenuPopup;
 	}
 
+GLMotif::Popup* Visualizer::createGocadPalettesMenu(void)
+	{
+	GLMotif::Popup* gocadPalettesMenuPopup=new GLMotif::Popup("GocadPalettesMenuPopup",Vrui::getWidgetManager());
+	
+	/* Create the palette creation menu and add entries for all standard palettes: */
+	GLMotif::SubMenu* gocadPalettes=new GLMotif::SubMenu("GocadPalettes",gocadPalettesMenuPopup,false);
+	
+	gocadPalettes->addEntry("Africa");
+	gocadPalettes->addEntry("BGR");
+	gocadPalettes->addEntry("Classic");
+	gocadPalettes->addEntry("Flag");
+	gocadPalettes->addEntry("Fluids");
+	gocadPalettes->addEntry("Green -> Yelow");
+	gocadPalettes->addEntry("Rainbow 0");
+	gocadPalettes->addEntry("Rainbow 1");
+	gocadPalettes->addEntry("Rainbow 2");
+	gocadPalettes->addEntry("Red -> Blue");
+	gocadPalettes->addEntry("White -> Blue");
+	
+	gocadPalettes->getEntrySelectCallbacks().add(this,&Visualizer::createGocadPaletteCallback);
+	
+	gocadPalettes->manageChild();
+	
+	return gocadPalettesMenuPopup;
+	}
+
 GLMotif::Popup* Visualizer::createColorMenu(void)
 	{
 	GLMotif::Popup* colorMenuPopup=new GLMotif::Popup("ColorMenuPopup",Vrui::getWidgetManager());
@@ -295,11 +321,14 @@ GLMotif::Popup* Visualizer::createColorMenu(void)
 	/* Create the color menu and add entries for all standard palettes: */
 	GLMotif::SubMenu* colorMenu=new GLMotif::SubMenu("ColorMenu",colorMenuPopup,false);
 	
-	GLMotif::CascadeButton* standardLuminancePalettesCascade=new GLMotif::CascadeButton("StandardLuminancePalettesCascade",colorMenu,"Create Luminance Palette");
+	GLMotif::CascadeButton* standardLuminancePalettesCascade=new GLMotif::CascadeButton("StandardLuminancePalettesCascade",colorMenu,"Luminance Palette");
 	standardLuminancePalettesCascade->setPopup(createStandardLuminancePalettesMenu());
 	
-	GLMotif::CascadeButton* standardSaturationPalettesCascade=new GLMotif::CascadeButton("StandardSaturationPalettesCascade",colorMenu,"Create Saturation Palette");
+	GLMotif::CascadeButton* standardSaturationPalettesCascade=new GLMotif::CascadeButton("StandardSaturationPalettesCascade",colorMenu,"Saturation Palette");
 	standardSaturationPalettesCascade->setPopup(createStandardSaturationPalettesMenu());
+
+	GLMotif::CascadeButton* gocadPalettesCascade=new GLMotif::CascadeButton("GocadPalettesCascade",colorMenu,"Gocad Palette");
+	gocadPalettesCascade->setPopup(createGocadPalettesMenu());
 	
 	GLMotif::Button* loadPaletteButton=new GLMotif::Button("LoadPaletteButton",colorMenu,"Load Palette File");
 	loadPaletteButton->getSelectCallbacks().add(this,&Visualizer::loadPaletteCallback);
@@ -1240,6 +1269,12 @@ void Visualizer::createStandardSaturationPaletteCallback(GLMotif::Menu::EntrySel
 	{
 	if(!inLoadPalette)
 		variableManager->createPalette(VariableManager::SATURATION_RED_CYAN+cbData->menu->getEntryIndex(cbData->selectedButton));
+	}
+
+void Visualizer::createGocadPaletteCallback(GLMotif::Menu::EntrySelectCallbackData* cbData)
+	{
+	if(!inLoadPalette)
+		variableManager->createPalette(VariableManager::GOCAD_AFRICA+cbData->menu->getEntryIndex(cbData->selectedButton));
 	}
 
 void Visualizer::showElementListCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)

@@ -729,6 +729,76 @@ void VariableManager::createPalette(int newPaletteType)
 			break;
 			}
 
+		case DIVERGING_3:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.902f,0.380f,0.004f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.945f,0.639f,0.251f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.996f,0.878f,0.714f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.969f,0.969f,0.969f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.847f,0.855f,0.922f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.600f,0.557f,0.765f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.329f,0.153f,0.533f,(6.0f/6.0f))));
+			break;
+			}
+
+		case DIVERGING_4:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.698f,0.094f,0.169f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.937f,0.541f,0.384f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.992f,0.859f,0.780f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.969f,0.969f,0.969f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.820f,0.898f,0.941f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.404f,0.663f,0.812f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.129f,0.400f,0.675f,(6.0f/6.0f))));
+			break;
+			}
+
+		case DIVERGING_5:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.698f,0.094f,0.169f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.937f,0.541f,0.384f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.992f,0.859f,0.780f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(1.000f,1.000f,1.000f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.878f,0.878f,0.878f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.600f,0.600f,0.600f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.302f,0.302f,0.302f,(6.0f/6.0f))));
+			break;
+			}
+
+		case DIVERGING_6:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.843f,0.188f,0.153f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.988f,0.553f,0.349f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.996f,0.878f,0.565f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(1.000f,1.000f,0.749f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.878f,0.953f,0.973f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.569f,0.749f,0.859f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.271f,0.459f,0.706f,(6.0f/6.0f))));
+			break;
+			}
+
+		case DIVERGING_7:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.843f,0.188f,0.153f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.988f,0.553f,0.349f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.996f,0.878f,0.545f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(1.000f,1.000f,0.749f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.851f,0.937f,0.545f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.569f,0.812f,0.376f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.102f,0.596f,0.314f,(6.0f/6.0f))));
+			break;
+			}
+
 		default:
 			createPalette=false;
 		}

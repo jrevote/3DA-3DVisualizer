@@ -347,6 +347,11 @@ GLMotif::Popup* Visualizer::createDivergingPalettesMenu(void)
 	divergingPalettes->addEntry("Diverging 0");
 	divergingPalettes->addEntry("Diverging 1");
 	divergingPalettes->addEntry("Diverging 2");
+	divergingPalettes->addEntry("Diverging 3");
+	divergingPalettes->addEntry("Diverging 4");
+	divergingPalettes->addEntry("Diverging 5");
+	divergingPalettes->addEntry("Diverging 6");
+	divergingPalettes->addEntry("Diverging 7");
 	
 	divergingPalettes->getEntrySelectCallbacks().add(this,&Visualizer::createDivergingPaletteCallback);
 	

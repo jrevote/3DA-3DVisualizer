@@ -687,6 +687,48 @@ void VariableManager::createPalette(int newPaletteType)
 			break;
 			}
 
+		case DIVERGING_0:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.549f,0.318f,0.039f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.847f,0.702f,0.396f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.964f,0.910f,0.765f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.961f,0.961f,0.961f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.780f,0.918f,0.937f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.353f,0.706f,0.675f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.004f,0.400f,0.369f,(6.0f/6.0f))));
+			break;
+			}
+
+		case DIVERGING_1:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.773f,0.106f,0.491f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.914f,0.639f,0.788f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.992f,0.918f,0.937f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.969f,0.969f,0.969f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.902f,0.961f,0.816f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.631f,0.843f,0.416f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.302f,0.573f,0.129f,(6.0f/6.0f))));
+			break;
+			}
+
+		case DIVERGING_2:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/6.0),Color(0.463f,0.165f,0.514f,(0.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/6.0),Color(0.686f,0.553f,0.765f,(1.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/6.0),Color(0.906f,0.831f,0.910f,(2.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/6.0),Color(0.969f,0.969f,0.969f,(3.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/6.0),Color(0.851f,0.941f,0.827f,(4.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/6.0),Color(0.498f,0.749f,0.482f,(5.0f/6.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(6.0/6.0),Color(0.106f,0.471f,0.216f,(6.0f/6.0f))));
+			break;
+			}
+
 		default:
 			createPalette=false;
 		}

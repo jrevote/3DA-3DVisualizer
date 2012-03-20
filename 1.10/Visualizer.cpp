@@ -337,6 +337,24 @@ GLMotif::Popup* Visualizer::createQualitativePalettesMenu(void)
 	return qualitativePalettesMenuPopup;
 	}
 
+GLMotif::Popup* Visualizer::createDivergingPalettesMenu(void)
+	{
+	GLMotif::Popup* divergingPalettesMenuPopup=new GLMotif::Popup("DivergingPalettesMenuPopup",Vrui::getWidgetManager());
+	
+	/* Create the palette creation menu and add entries for all standard palettes: */
+	GLMotif::SubMenu* divergingPalettes=new GLMotif::SubMenu("DivergingPalettes",divergingPalettesMenuPopup,false);
+	
+	divergingPalettes->addEntry("Diverging 0");
+	divergingPalettes->addEntry("Diverging 1");
+	divergingPalettes->addEntry("Diverging 2");
+	
+	divergingPalettes->getEntrySelectCallbacks().add(this,&Visualizer::createDivergingPaletteCallback);
+	
+	divergingPalettes->manageChild();
+	
+	return divergingPalettesMenuPopup;
+	}
+
 GLMotif::Popup* Visualizer::createColorMenu(void)
 	{
 	GLMotif::Popup* colorMenuPopup=new GLMotif::Popup("ColorMenuPopup",Vrui::getWidgetManager());
@@ -355,6 +373,9 @@ GLMotif::Popup* Visualizer::createColorMenu(void)
 
 	GLMotif::CascadeButton* qualitativePalettesCascade=new GLMotif::CascadeButton("QualitativePalettesCascade",colorMenu,"Qualitative Palette");
 	qualitativePalettesCascade->setPopup(createQualitativePalettesMenu());
+
+	GLMotif::CascadeButton* divergingPalettesCascade=new GLMotif::CascadeButton("DivergingPalettesCascade",colorMenu,"Diverging Palette");
+	divergingPalettesCascade->setPopup(createDivergingPalettesMenu());
 	
 	GLMotif::Button* loadPaletteButton=new GLMotif::Button("LoadPaletteButton",colorMenu,"Load Palette File");
 	loadPaletteButton->getSelectCallbacks().add(this,&Visualizer::loadPaletteCallback);
@@ -1307,6 +1328,12 @@ void Visualizer::createQualitativePaletteCallback(GLMotif::Menu::EntrySelectCall
 	{
 	if(!inLoadPalette)
 		variableManager->createPalette(VariableManager::QUALITATIVE_0+cbData->menu->getEntryIndex(cbData->selectedButton));
+	}
+
+void Visualizer::createDivergingPaletteCallback(GLMotif::Menu::EntrySelectCallbackData* cbData)
+	{
+	if(!inLoadPalette)
+		variableManager->createPalette(VariableManager::DIVERGING_0+cbData->menu->getEntryIndex(cbData->selectedButton));
 	}
 
 void Visualizer::showElementListCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)

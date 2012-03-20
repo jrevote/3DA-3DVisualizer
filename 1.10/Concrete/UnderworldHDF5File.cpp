@@ -62,6 +62,8 @@ const char* getClassString(H5T_class_t classID)
          return "H5T_FLOAT";
       case H5T_STRING:
          return "H5T_STRING";
+      default:
+         return "UNKNOWN";
       }
    }
 
@@ -73,6 +75,8 @@ const char* getOrderString(H5T_order_t orderID)
          return "H5T_ORDER_LE";
       case H5T_ORDER_BE:
          return "H5T_ORDER_BE";
+      default:
+         return "UNKNOWN";
       }
    }
 
@@ -103,7 +107,7 @@ void readMetaDataFromH5(
    dataSpace=H5Dget_space(dataSet);
    /* Get rank: */
    dataRank=H5Sget_simple_extent_ndims(dataSpace);
-   herr_t dataRet=H5Sget_simple_extent_dims(dataSpace,dataDims,NULL);
+   H5Sget_simple_extent_dims(dataSpace,dataDims,NULL);
        
    /* Display data information: */
    std::cout<<"------Rank: "<<dataRank<<"\n"<<std::flush;
@@ -152,7 +156,7 @@ void readRealDataFromH5(hid_t dataSet,int dataRank,hsize_t dataDims[],hid_t data
       H5Sselect_hyperslab(dataSpace,H5S_SELECT_SET,dataStart,NULL,dataNodeCount,NULL);
       H5Sselect_all(dataMemSpace);
       /* Read one record (defined by the memory space) and save in the buffer: */
-      herr_t dataRet=H5Dread(dataSet,H5T_NATIVE_INT,dataMemSpace,dataSpace,H5P_DEFAULT,dataBuffer);
+      H5Dread(dataSet,H5T_NATIVE_INT,dataMemSpace,dataSpace,H5P_DEFAULT,dataBuffer);
       /* Pass the value from the buffer into the value data structure: */
       for(unsigned data_J=0;data_J<dataDims[1];++data_J)
          dataValues[(data_I*dataDims[1])+data_J]=dataBuffer[data_J];
@@ -182,7 +186,7 @@ void readRealDataFromH5(hid_t dataSet,int dataRank,hsize_t dataDims[],hid_t data
       H5Sselect_hyperslab(dataSpace,H5S_SELECT_SET,dataStart,NULL,dataNodeCount,NULL);
       H5Sselect_all(dataMemSpace);
       /* Read one record (defined by the memory space) and save in the buffer: */
-      herr_t dataRet=H5Dread(dataSet,H5T_NATIVE_DOUBLE,dataMemSpace,dataSpace,H5P_DEFAULT,dataBuffer);
+      H5Dread(dataSet,H5T_NATIVE_DOUBLE,dataMemSpace,dataSpace,H5P_DEFAULT,dataBuffer);
       /* Pass the value from the buffer into the value data structure: */
       for(unsigned data_J=0;data_J<dataDims[1];++data_J)
          dataValues[(data_I*dataDims[1])+data_J]=dataBuffer[data_J];
@@ -203,7 +207,7 @@ void getFieldColumnCount(const char* fieldFileName,int& numFields,hsize_t vertDi
    hid_t fieldDataSet=H5Dopen2(fieldFile,"/data",H5P_DEFAULT);
    hid_t fieldSpace=H5Dget_space(fieldDataSet);
    hsize_t fieldDims[64];
-   herr_t fieldRet=H5Sget_simple_extent_dims(fieldSpace,fieldDims,NULL);
+   H5Sget_simple_extent_dims(fieldSpace,fieldDims,NULL);
    /* Get total column for the field variable and add it to the total: */
    int offset=fieldDims[1]-vertDims;
    numFields+=offset>0?offset:1;
@@ -305,7 +309,7 @@ void readFieldValues(
          DataValue::VVector vector;
 
          /* Read one record (defined by the memory space) and save in the buffer: */
-         herr_t fieldRet=H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
+         H5Dread(fieldDataSet,H5T_NATIVE_DOUBLE,fieldMemSpace,fieldSpace,H5P_DEFAULT,fieldBuffer);
          for(int field_K=0;field_K<columns;++field_K)
             {
             /* Assign field value to vertex in the dataset: */
@@ -363,7 +367,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    const char* meshFileName=0;
    std::vector<std::string> scalarFileNames;
    std::vector<std::string> vectorFileNames;
-   bool nextMesh=false;
    bool nextScalar=false;
    bool nextVector=false;
 
@@ -411,7 +414,6 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       Misc::throwStdErr("UnderworldHDF5File::load: No input mesh name provided.");
 
    /* Open/read the mesh dataset: */
-   int meshSize[3];
    std::cout<<"Reading Mesh...\n"<<std::flush;
    hid_t meshFile=H5Fopen(meshFileName,H5F_ACC_RDONLY,H5P_DEFAULT);
    /* Make sure that the mesh file is valid: */
@@ -426,14 +428,12 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
    /* Retrieve standard information from the mesh: */
    H5Oget_info(meshGroupID,&meshInfo);
    std::cout<<"---Number of Attributes: "<<meshInfo.num_attrs<<"\n"<<std::flush;
-   int* meshResolution;
+   int* meshResolution = NULL;
 
    /* Iterate through the mesh attributes: */
    for(unsigned attr_I=0;attr_I<(unsigned)meshInfo.num_attrs;++attr_I)
       {
       char attrName[100];
-      char attrSpaceString[100];
-      char attrTypeString[100];
       hsize_t attrDim[64];
 
       /* Open the attribute using the attribute index: */
@@ -449,7 +449,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
       /* Get attribute rank: */
       int attrRank=H5Sget_simple_extent_ndims(attrSpace);
       /* Get attribute dimension: */
-      herr_t attrRet=H5Sget_simple_extent_dims(attrSpace,attrDim,NULL);
+      H5Sget_simple_extent_dims(attrSpace,attrDim,NULL);
       /* Get attribute DATATYPE native memory: */
       hid_t attrTypeMem=H5Tget_native_type(attrType,H5T_DIR_ASCEND);
 
@@ -476,7 +476,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          size_t npoints=H5Sget_simple_extent_npoints(attrSpace);
          float* float_array=new float[npoints];
          /* Read the attribute values: */
-         attrRet=H5Aread(attrID,attrTypeMem,float_array);
+         H5Aread(attrID,attrTypeMem,float_array);
          std::cout<<"---------Values: "<<std::flush;
          for(int value_I=0;value_I<(int)npoints;++value_I)
             {
@@ -493,7 +493,7 @@ Visualization::Abstract::DataSet* UnderworldHDF5File::load(const std::vector<std
          size_t npoints=H5Sget_simple_extent_npoints(attrSpace);
          int* int_array=new int[npoints];
          /* Read the attribute values: */
-         attrRet=H5Aread(attrID,attrTypeMem,int_array);
+         H5Aread(attrID,attrTypeMem,int_array);
          std::cout<<"---------Values: "<<std::flush;
          for(int value_I=0;value_I<(int)npoints;++value_I)
             {

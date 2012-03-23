@@ -799,6 +799,58 @@ void VariableManager::createPalette(int newPaletteType)
 			break;
 			}
 
+		case SEQUENTIAL_0:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/5.0),Color(1.000f,1.000f,0.800f,(0.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/5.0),Color(0.851f,0.941f,0.639f,(1.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/5.0),Color(0.851f,0.867f,0.557f,(2.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/5.0),Color(0.549f,0.776f,0.475f,(3.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/5.0),Color(0.192f,0.639f,0.329f,(4.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/5.0),Color(0.000f,0.409f,0.216f,(5.0f/5.0f))));
+			break;
+			}
+
+		case SEQUENTIAL_1:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/5.0),Color(1.000f,1.000f,0.800f,(0.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/5.0),Color(0.780f,0.914f,0.706f,(1.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/5.0),Color(0.498f,0.804f,0.733f,(2.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/5.0),Color(0.255f,0.714f,0.769f,(3.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/5.0),Color(0.173f,0.498f,0.722f,(4.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/5.0),Color(0.145f,0.204f,0.580f,(5.0f/5.0f))));
+			break;
+			}
+
+		case SEQUENTIAL_2:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/5.0),Color(1.000f,1.000f,0.831f,(0.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/5.0),Color(0.996f,0.890f,0.569f,(1.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/5.0),Color(0.996f,0.769f,0.310f,(2.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/5.0),Color(0.996f,0.600f,0.161f,(3.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/5.0),Color(0.851f,0.373f,0.055f,(4.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/5.0),Color(0.600f,0.204f,0.016f,(5.0f/5.0f))));
+			break;
+			}
+
+		case SEQUENTIAL_3:
+			{
+			double o=valueRange.first;
+			double f=valueRange.second-o;
+			controlPoints.push_back(ControlPoint(o+f*(0.0/5.0),Color(0.996f,0.922f,0.886f,(0.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(1.0/5.0),Color(0.998f,0.773f,0.753f,(1.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(2.0/5.0),Color(0.980f,0.624f,0.710f,(2.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(3.0/5.0),Color(0.969f,0.408f,0.631f,(3.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(4.0/5.0),Color(0.773f,0.106f,0.541f,(4.0f/5.0f))));
+			controlPoints.push_back(ControlPoint(o+f*(5.0/5.0),Color(0.478f,0.004f,0.467f,(5.0f/5.0f))));
+			break;
+			}
+
 		default:
 			createPalette=false;
 		}

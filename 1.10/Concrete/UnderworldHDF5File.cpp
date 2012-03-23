@@ -88,6 +88,8 @@ const hid_t getNativeTypeFromDataClass(H5T_class_t dataClass)
          return H5T_NATIVE_FLOAT;
       case H5T_INTEGER:
          return H5T_NATIVE_INT;
+      default:
+         return 0;
       }
    }
 

@@ -194,7 +194,7 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             */
             /* Store the position and value in the data set: */
             dataSet.getVertexPosition(coordIndex)=DS::Point(pos);
-            dataSet.getVertexValue(0,coordIndex)=Scalar(value);
+            dataSet.getVertexValue(0,coordIndex)=Scalar(Math::log10(value));
             ++counter;
             }
    /*

@@ -342,7 +342,7 @@ const char*
 CurvilinearGridRenderer<DataSetParam>::getRenderingModeName(
 	int renderingModeIndex)
 	{
-	if(renderingModeIndex<0||renderingModeIndex>=4)
+	if(renderingModeIndex<0||renderingModeIndex>=5)
 		Misc::throwStdErr("CurvilinearGridRenderer::getRenderingModeName: invalid rendering mode index %d",renderingModeIndex);
 	
 	static const char* renderingModeNames[5]=

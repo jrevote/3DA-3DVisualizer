@@ -69,7 +69,8 @@ MODULE_NAMES = SphericalASCIIFile \
                DicomImageStack \
                MultiChannelImageStack \
                GocadVoxetFile \
-               UnderworldHDF5File
+               UnderworldHDF5File \
+               Sasha3DFile
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them

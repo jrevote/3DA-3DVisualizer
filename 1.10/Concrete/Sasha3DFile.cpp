@@ -96,6 +96,7 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    /* Storage for the nodes and data: */
    std::vector<double> offsets[3];
    std::vector<double> resistivity;
+   double offsetCumSums[3];
    //std::vector<double>::iterator offsetIterators[3];
 
    for(unsigned xyz_I=0;xyz_I<3;++xyz_I)
@@ -116,7 +117,8 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             if(charIndex>0)
                {
                sscanf(valueBuffer,"%lf",&realValue);
-               offsets[xyz_I].push_back(realValue);
+               offsets[xyz_I].push_back(realValue/1000);
+               offsetCumSums[xyz_I]+=(realValue/1000);
                ++index[xyz_I];
                }
             readRealValue=false;
@@ -134,6 +136,18 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             }
          }
       }
+   
+   double startX=*std::max_element(offsets[0].begin(),offsets[0].end());
+   double startY=*std::max_element(offsets[1].begin(),offsets[1].end());
+   double startZ=*std::max_element(offsets[2].begin(),offsets[2].end());
+
+   std::cout<<"Max X: "<<startX<<"\n"<<std::flush;
+   std::cout<<"Max Y: "<<startY<<"\n"<<std::flush;
+   std::cout<<"Max Z: "<<startZ<<"\n"<<std::flush;
+   std::cout<<"Cumulative Sum:\n"<<std::flush;
+   std::cout<<"X: "<<offsetCumSums[0]<<"\n"<<std::flush;
+   std::cout<<"Y: "<<offsetCumSums[1]<<"\n"<<std::flush;
+   std::cout<<"Z: "<<offsetCumSums[2]<<"\n"<<std::flush;
 
    std::sort(offsets[0].begin(),offsets[0].end());
    std::sort(offsets[1].begin(),offsets[1].end());

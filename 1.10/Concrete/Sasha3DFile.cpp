@@ -96,7 +96,7 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    /* Storage for the nodes and data: */
    std::vector<double> offsets[3];
    std::vector<double> resistivity;
-   double offsetCumSums[3];
+   double offsetCumSums[3]={0.0,0.0,0.0};
    //std::vector<double>::iterator offsetIterators[3];
 
    for(unsigned xyz_I=0;xyz_I<3;++xyz_I)
@@ -117,8 +117,8 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             if(charIndex>0)
                {
                sscanf(valueBuffer,"%lf",&realValue);
-               offsets[xyz_I].push_back(realValue);
-               offsetCumSums[xyz_I]+=(realValue);
+               offsets[xyz_I].push_back(realValue/1000);
+               offsetCumSums[xyz_I]+=(realValue/1000);
                ++index[xyz_I];
                }
             readRealValue=false;
@@ -137,9 +137,9 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
          }
       }
    
-   //double startX=-*std::max_element(offsets[0].begin(),offsets[0].end());
-   //double startY=-*std::max_element(offsets[1].begin(),offsets[1].end());
-   //double startZ=*std::max_element(offsets[2].begin(),offsets[2].end());
+   //double startX=offsets[2][0];
+   //double startY=offsets[1][0];
+   //double startZ=offsets[0][0];
 
    double startX=0.0;
    double startY=0.0;
@@ -152,33 +152,6 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    std::cout<<"X: "<<offsetCumSums[0]<<"\n"<<std::flush;
    std::cout<<"Y: "<<offsetCumSums[1]<<"\n"<<std::flush;
    std::cout<<"Z: "<<offsetCumSums[2]<<"\n"<<std::flush;
-
-   //std::sort(offsets[0].begin(),offsets[0].end());
-   //std::sort(offsets[1].begin(),offsets[1].end());
-   //std::sort(offsets[2].begin(),offsets[2].end());
-   
-   /*
-   int k_counter=0;
-   for(offsetIterators[0]=offsets[0].begin();offsetIterators[0]!=offsets[0].end();++offsetIterators[0])
-      {
-      std::cout<<k_counter<<": "<<*offsetIterators[0]<<"\n"<<std::flush;
-      ++k_counter;
-      }
-
-   k_counter=0;
-   for(offsetIterators[1]=offsets[1].begin();offsetIterators[1]!=offsets[1].end();++offsetIterators[1])
-      {
-      std::cout<<k_counter<<": "<<*offsetIterators[1]<<"\n"<<std::flush;
-      ++k_counter;
-      }
-
-   k_counter=0;
-   for(offsetIterators[2]=offsets[2].begin();offsetIterators[2]!=offsets[2].end();++offsetIterators[2])
-      {
-      std::cout<<k_counter<<": "<<*offsetIterators[2]<<"\n"<<std::flush;
-      ++k_counter;
-      }
-   */
 
    int numOfNodes=numVertices[0]*numVertices[1]*numVertices[2];
    for(int data_I=0;data_I<numOfNodes&&!gridFile.eof();++data_I)
@@ -199,9 +172,11 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    double pos[3]={startX,startY,startZ};
    for(coordIndex[0]=0;coordIndex[0]<numVertices[0];++coordIndex[0])
       {
+      pos[2]+=offsets[0][coordIndex[0]];
       pos[1]=startY;
       for(coordIndex[1]=0;coordIndex[1]<numVertices[1];++coordIndex[1])
          {
+         pos[1]+=offsets[1][coordIndex[1]];
          pos[0]=startX;
          for(coordIndex[2]=0;coordIndex[2]<numVertices[2];++coordIndex[2])
             {
@@ -210,15 +185,13 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             sashaFile<<pos[0]<<" "<<pos[1]<<" "<<pos[2]<<"\n"<<std::flush;
             resistivityFile<<value<<"\n"<<std::flush;
             /* Store the position and value in the data set: */
+            pos[0]+=offsets[2][coordIndex[2]];
             newCoord<<pos[0]<<" "<<pos[1]<<" "<<pos[2]<<"\n"<<std::flush;
             dataSet.getVertexPosition(coordIndex)=DS::Point(pos);
             dataSet.getVertexValue(0,coordIndex)=Scalar(Math::log10(value));
-            pos[0]+=offsets[2][coordIndex[2]];
             ++counter;
             }
-         pos[1]+=offsets[1][coordIndex[1]];
          }
-      pos[2]+=offsets[0][coordIndex[0]];
       }
    newCoord.close();
    sashaFile.close();

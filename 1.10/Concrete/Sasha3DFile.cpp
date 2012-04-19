@@ -170,8 +170,8 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             {
             double value;
             //value = resistivity[counter];
-            /* Store the position and value in the data set: */
             pos[0]+=offsets[2][coordIndex[2]];
+            /* Store the position and value in the data set: */
             dataSet.getVertexPosition(coordIndex)=DS::Point(pos);
             //dataSet.getVertexValue(0,coordIndex)=Scalar(Math::log10(value));
             dataSet.getVertexValue(0,coordIndex)=Scalar(100.0f/(coordIndex[0]*coordIndex[1]*coordIndex[2]+1.0f));

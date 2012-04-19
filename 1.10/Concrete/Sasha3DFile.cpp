@@ -170,7 +170,6 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             {
             double value;
             //value = resistivity[counter];
-            resistivityFile<<value<<"\n"<<std::flush;
             /* Store the position and value in the data set: */
             pos[0]+=offsets[2][coordIndex[2]];
             dataSet.getVertexPosition(coordIndex)=DS::Point(pos);
@@ -182,9 +181,6 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
          }
       pos[2]+=offsets[0][coordIndex[0]];
       }
-   newCoord.close();
-   sashaFile.close();
-   resistivityFile.close();
 
    /* Finalize the grid structure: */
    std::cout<<"Finalizing grid structure..."<<std::flush;

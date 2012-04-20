@@ -143,9 +143,8 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    double startY=0.0f;
    double startZ=0.0f;
 
-   #if 0
-   int totalVertices=numVertices[0]*numVertices[1]*numVertices[2];
-   for(int data_I=0;data_I<totalVertices&&!gridFile.eof();++data_I)
+   int totalBlocks=numBlocks[0]*numBlocks[1]*numBlocks[2];
+   for(int data_I=0;data_I<totalBlocks&&!gridFile.eof();++data_I)
       {
       double realValue;
       /* Read data values: */
@@ -153,7 +152,6 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
       sscanf(line,"%lf",&realValue);
       resistivity.push_back(realValue);
       }
-   #endif
 
    /* Add the vertices and vertex data into the dataset: */
    DS::Index coordIndex;
@@ -168,7 +166,7 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
          pos[0]=startX;
          for(coordIndex[2]=0;coordIndex[2]<numVertices[2];++coordIndex[2])
             {
-            double value;
+            //double value;
             //value = resistivity[counter];
             pos[0]+=offsets[2][coordIndex[2]];
             /* Store the position and value in the data set: */

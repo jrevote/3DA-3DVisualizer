@@ -57,12 +57,11 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    std::vector<std::string>::const_iterator argIt=args.begin();
    
    /* Open the grid definition file: */
-   std::cout<<"Reading file "<<*argIt<<"..."<<std::flush;
+   std::cout<<"Reading file "<<*argIt<<"...\n"<<std::flush;
    Misc::File gridFile(argIt->c_str(),"rt");
    
    /* Parse the grid file header: */
    DS::Index numBlocks(-1,-1,-1);
-   DS::Index numVertices(-1,-1,-1);
    unsigned int lineIndex = 0;
    char line[256];
    
@@ -80,17 +79,14 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    if(sscanf(line+2,"%d  %d  %d",&numBlocks[0],&numBlocks[1],&numBlocks[2])!=3)
       Misc::throwStdErr("Sasha3DFile::load: invalid grid size in line %u in grid file %s",lineIndex,argIt->c_str());
 
-   numVertices[0]=numBlocks[0]+1;
-   numVertices[1]=numBlocks[1]+1;
-   numVertices[2]=numBlocks[2]+1;
-         
    /* Initialize the data set: */
    DS& dataSet=result->getDs();
-   dataSet.setGrid(numVertices);
-   dataSet.addSlice(); // Add a single scalar variable to the data set's grid
+   dataSet.setGrid(numBlocks);
+   /* Add a single scalar variable to the data set's grid: */
+	dataSet.addSlice(); 
    
    /* Initialize the result data set's data value: */
-   DataValue& dataValue = result->getDataValue();
+   DataValue& dataValue=result->getDataValue();
    dataValue.initialize(&dataSet,0);
    dataValue.setScalarVariableName(0,"Resistivity");
 
@@ -98,8 +94,8 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
 
    /* Storage for the nodes and data: */
    std::vector<double> offsets[3];
+   std::vector<double> midOffsets[3];
    std::vector<double> resistivity;
-   double offsetCumSums[3]={0.0,0.0,0.0};
 
    for(unsigned xyz_I=0;xyz_I<3;++xyz_I)
       {
@@ -119,8 +115,8 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             if(charIndex>0)
                {
                sscanf(valueBuffer,"%lf",&realValue);
-               offsets[xyz_I].push_back(realValue/1000);
-               offsetCumSums[xyz_I]+=(realValue/1000);
+               offsets[xyz_I].push_back(realValue);
+               midOffsets[xyz_I].push_back((realValue)/2);
                ++index[xyz_I];
                }
             readRealValue=false;
@@ -139,10 +135,6 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
          }
       }
    
-   double startX=0.0f;
-   double startY=0.0f;
-   double startZ=0.0f;
-
    int totalBlocks=numBlocks[0]*numBlocks[1]*numBlocks[2];
    for(int data_I=0;data_I<totalBlocks&&!gridFile.eof();++data_I)
       {
@@ -156,32 +148,35 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    /* Add the vertices and vertex data into the dataset: */
    DS::Index coordIndex;
    int counter=0;
-   double pos[3]={startX,startY,startZ};
+   double pos[3]={0.0f,0.0f,0.0f};
+   coordIndex[0]=0;
+   coordIndex[1]=0;
+   coordIndex[2]=0;
 
-   for(coordIndex[0]=0;coordIndex[0]<numVertices[0];++coordIndex[0])
+   for(coordIndex[0]=0;coordIndex[0]<numBlocks[0];++coordIndex[0])
       {
-      pos[1]=startY;
-      for(coordIndex[1]=0;coordIndex[1]<numVertices[1];++coordIndex[1])
+      pos[1]=0.0f;
+      if(coordIndex[0]>0)
+         pos[2]+=(midOffsets[0][coordIndex[0]])+(midOffsets[0][coordIndex[0]-1]);
+      for(coordIndex[1]=0;coordIndex[1]<numBlocks[1];++coordIndex[1])
          {
-         pos[0]=startX;
-         for(coordIndex[2]=0;coordIndex[2]<numVertices[2];++coordIndex[2])
+         pos[0]=0.0f;
+         if(coordIndex[1]>0)
+            pos[1]+=(midOffsets[1][coordIndex[1]])+(midOffsets[1][coordIndex[1]-1]);
+         for(coordIndex[2]=0;coordIndex[2]<numBlocks[2];++coordIndex[2])
             {
-            //double value;
-            //value = resistivity[counter];
-            pos[0]+=offsets[2][coordIndex[2]];
+            if(coordIndex[2]>0)
+               pos[0]+=(midOffsets[2][coordIndex[2]])+(midOffsets[2][coordIndex[2]-1]);
             /* Store the position and value in the data set: */
             dataSet.getVertexPosition(coordIndex)=DS::Point(pos);
-            //dataSet.getVertexValue(0,coordIndex)=Scalar(Math::log10(value));
-            dataSet.getVertexValue(0,coordIndex)=Scalar(100.0f/(coordIndex[0]*coordIndex[1]*coordIndex[2]+1.0f));
+            dataSet.getVertexValue(0,coordIndex)=Scalar(Math::log10(resistivity[counter]));
             ++counter;
             }
-         pos[1]+=offsets[1][coordIndex[1]];
          }
-      pos[2]+=offsets[0][coordIndex[0]];
       }
 
    /* Finalize the grid structure: */
-   std::cout<<"Finalizing grid structure..."<<std::flush;
+   std::cout<<"Finalizing grid structure ("<<coordIndex[0]<<" "<<coordIndex[1]<<" "<<coordIndex[2]<<")...\n"<<std::flush;
    dataSet.finalizeGrid();
    std::cout<<" done"<<std::endl;
    

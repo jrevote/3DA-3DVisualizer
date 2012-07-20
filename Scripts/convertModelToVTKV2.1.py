@@ -120,34 +120,35 @@ else:
                if dcounter < total_blocks:
                   values = line.split()
                   for value in values:
-                     block_data.append(math.log10(float(value)))
+                     #block_data.append(math.log10(float(value)))
+                     block_data.append(float(value))
                      dcounter += 1
                else:
                   read_data = False    
    
       # Write the first section of the VTK output file.               
       vtk_file.write('<StructuredGrid WholeExtent=\"'
-                     '0 ' + str(zblocks) +
+                     '0 ' + str(xblocks) +
                      ' 0 ' + str(yblocks) +
-                     ' 0 ' + str(xblocks) + '\">\n' +
+                     ' 0 ' + str(zblocks) + '\">\n' +
                      '<Piece Extent=\"'
-                     '0 ' + str(zblocks) +
+                     '0 ' + str(xblocks) +
                      ' 0 ' + str(yblocks) +
-                     ' 0 ' + str(xblocks) + '\">\n'
+                     ' 0 ' + str(zblocks) + '\">\n'
                      '<Points>\n'
                      '<DataArray Name=\"xyz\" NumberOfComponents=\"3\"'
                      ' type=\"Float64\" format=\"ascii\">\n')
   
       posx, posy, posz = 0, 0, 0
       # Generate the nodes position.
-      for x_i in range(xnodes):
+      for x_i in range(znodes):
          posy = 0
-         posz += float(block_sizes['X'][x_i])
+         posz += float(block_sizes['Z'][x_i])
          for y_i in range(ynodes):
             posx = 0
             posy += float(block_sizes['Y'][y_i])
-            for z_i in range(znodes):
-               posx += float(block_sizes['Z'][z_i])
+            for z_i in range(xnodes):
+               posx += float(block_sizes['X'][z_i])
                # Write the node coordinates to the file.
                vtk_file.write(str("%.6f" % posx) + " " +
                               str("%.6f" % posy) + " " +

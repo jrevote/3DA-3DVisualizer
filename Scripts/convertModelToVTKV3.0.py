@@ -109,9 +109,6 @@ else:
                      block_sizes[coord].append(float(size))
                
                if zcounter == zblocks:
-                  #print block_sizes['X']
-                  #print block_sizes['Y']
-                  #print block_sizes['Z']
                   read_blocks = False
                   read_data = True
                   
@@ -141,15 +138,8 @@ else:
                      ' RangeMax=\"' + str("%.6f" % max(block_data)) + '\">\n')
 
       # Write the resistivity cell values.
-      #line_i = 0
       for r_i in range(0, len(block_data)):
          vtk_file.write(str("%.6f" % block_data[r_i]) + "\n")
-      #   line_i += 1
-      #   if line_i < 6:
-      #      vtk_file.write(" ")
-      #   else:
-      #      vtk_file.write("\n")
-      #      line_i = 0
      
       block_coords = {'X':[], 'Y':[], 'Z':[]}
 
@@ -171,54 +161,33 @@ else:
                      '</CellData>\n'
                      '<Coordinates>\n')
    
-      vtk_file.write('<DataArray type=\"Float64\" Name=\"X\" format=\"ascii\"'
-                     ' RangeMin=\"' + str("%.6f" % min(block_coords['Z'])) + '\"'
-                     ' RangeMax=\"' + str("%.6f" % max(block_coords['Z'])) + '\">\n')
-
-      #line_i = 0
-      for z_i in range(znodes):
-         vtk_file.write(str("%.6f" % block_coords['Z'][z_i]) + "\n")
-         #line_i += 1
-         #if line_i < 6:
-         #   vtk_file.write(" ")
-         #else:
-         #   vtk_file.write("\n")
-         #   line_i = 0
-
-      vtk_file.write('</DataArray>\n')
-
-      vtk_file.write('<DataArray type=\"Float64\" Name=\"Y\" format=\"ascii\"'
-                     ' RangeMin=\"' + str("%.6f" % min(block_coords['Y'])) + '\"'
-                     ' RangeMax=\"' + str("%.6f" % max(block_coords['Y'])) + '\">\n')
-     
-      #line_i = 0 
-      for y_i in range(ynodes):
-         vtk_file.write(str("%.6f" % block_coords['Y'][y_i]) + "\n")
-      #   line_i += 1
-      #   if line_i < 6:
-      #      vtk_file.write(" ")
-      #   else:
-      #      vtk_file.write("\n")
-      #      line_i = 0
-   
-      vtk_file.write('</DataArray>\n')
-
       vtk_file.write('<DataArray type=\"Float64\" Name=\"Z\" format=\"ascii\"'
                      ' RangeMin=\"' + str("%.6f" % min(block_coords['X'])) + '\"'
                      ' RangeMax=\"' + str("%.6f" % max(block_coords['X'])) + '\">\n')
 
-      #line_i = 0 
       for x_i in range(xnodes):
          vtk_file.write(str("%.6f" % block_coords['X'][x_i]) + "\n")
-      #   line_i += 1
-      #   if line_i < 6:
-      #      vtk_file.write(" ")
-      #   else:
-      #      vtk_file.write("\n")
-      #      line_i = 0
 
       vtk_file.write('</DataArray>\n')
    
+      vtk_file.write('<DataArray type=\"Float64\" Name=\"Y\" format=\"ascii\"'
+                     ' RangeMin=\"' + str("%.6f" % min(block_coords['Y'])) + '\"'
+                     ' RangeMax=\"' + str("%.6f" % max(block_coords['Y'])) + '\">\n')
+     
+      for y_i in range(ynodes):
+         vtk_file.write(str("%.6f" % block_coords['Y'][y_i]) + "\n")
+   
+      vtk_file.write('</DataArray>\n')
+
+      vtk_file.write('<DataArray type=\"Float64\" Name=\"X\" format=\"ascii\"'
+                     ' RangeMin=\"' + str("%.6f" % min(block_coords['Z'])) + '\"'
+                     ' RangeMax=\"' + str("%.6f" % max(block_coords['Z'])) + '\">\n')
+
+      for z_i in range(znodes):
+         vtk_file.write(str("%.6f" % (-1 * block_coords['Z'][z_i])) + "\n")
+
+      vtk_file.write('</DataArray>\n')
+
       # Write ending tags to finish the VTK file.        
       vtk_file.write('</Coordinates>\n')
       vtk_file.write('</Piece>\n')

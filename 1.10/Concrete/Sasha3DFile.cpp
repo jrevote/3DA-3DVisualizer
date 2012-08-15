@@ -152,6 +152,7 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
    coordIndex[0]=0;
    coordIndex[1]=0;
    coordIndex[2]=0;
+   std::ofstream sashaFile("SashaNVP.vts");
 
    for(coordIndex[0]=0;coordIndex[0]<numBlocks[0];++coordIndex[0])
       {
@@ -170,10 +171,28 @@ Visualization::Abstract::DataSet* Sasha3DFile::load(const std::vector<std::strin
             /* Store the position and value in the data set: */
             dataSet.getVertexPosition(coordIndex)=DS::Point(pos);
             dataSet.getVertexValue(0,coordIndex)=Scalar(Math::log10(resistivity[counter]));
+            pos[0]+=offsets[2][coordIndex[2]];
             ++counter;
             }
          }
       }
+
+   sashaFile<<"</DataArray>\n"<<std::flush;
+   sashaFile<<"</Points>\n"<<std::flush;
+   sashaFile<<"<CellData>\n"<<std::flush;
+   sashaFile<<"<DataArray Name=\"Resistivity\" NumberOfComponents=\"1\" type=\"Float64\" format=\"ascii\">\n"<<std::flush;
+
+   for(int value_I=0;value_I<totalBlocks;++value_I)
+      {
+      sashaFile<<Math::log10(resistivity[value_I])<<"\n"<<std::flush;
+      }
+  
+   sashaFile<<"</DataArray>\n"<<std::flush;
+   sashaFile<<"</CellData>\n"<<std::flush;
+   sashaFile<<"</Piece>\n"<<std::flush;
+   sashaFile<<"</StructuredGrid>\n"<<std::flush;
+   sashaFile<<"</VTKFile>\n"<<std::flush;
+   sashaFile.close();
 
    /* Finalize the grid structure: */
    std::cout<<"Finalizing grid structure ("<<coordIndex[0]<<" "<<coordIndex[1]<<" "<<coordIndex[2]<<")...\n"<<std::flush;

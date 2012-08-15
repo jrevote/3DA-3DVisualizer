@@ -166,7 +166,7 @@ else:
                      ' RangeMax=\"' + str("%.6f" % max(block_coords['X'])) + '\">\n')
 
       for x_i in range(xnodes):
-         vtk_file.write(str("%.6f" % block_coords['X'][x_i]) + "\n")
+         vtk_file.write(str("%.6f" % (-1 * block_coords['X'][x_i])) + "\n")
 
       vtk_file.write('</DataArray>\n')
    

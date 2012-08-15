@@ -1,0 +1,155 @@
+/***********************************************************************
+ColoredIsosurface - Wrapper class for color-mapped isosurfaces as
+visualization elements.
+Part of the wrapper layer of the templatized visualization
+components.
+Copyright (c) 2008-2012 Oliver Kreylos
+
+This file is part of the 3D Data Visualizer (Visualizer).
+
+The 3D Data Visualizer is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+The 3D Data Visualizer is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with the 3D Data Visualizer; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+***********************************************************************/
+
+#define VISUALIZATION_WRAPPERS_ISOSURFACE_IMPLEMENTATION
+
+#include <Wrappers/ColoredIsosurface.h>
+
+#include <GL/gl.h>
+#include <GL/GLMaterialTemplates.h>
+
+#include <Abstract/VariableManager.h>
+
+#include <GLRenderState.h>
+#ifdef VISUALIZATION_USE_SHADERS
+#include <TwoSided1DTexturedSurfaceShader.h>
+#endif
+
+namespace Visualization {
+
+namespace Wrappers {
+
+/**********************************
+Methods of class ColoredIsosurface:
+**********************************/
+
+template <class DataSetWrapperParam>
+inline
+ColoredIsosurface<DataSetWrapperParam>::ColoredIsosurface(
+	Visualization::Abstract::VariableManager* sVariableManager,
+	Visualization::Abstract::Parameters* sParameters,
+	int sScalarVariableIndex,
+	bool sLighting,
+	Cluster::MulticastPipe* pipe)
+	:Visualization::Abstract::Element(sVariableManager,sParameters),
+	 scalarVariableIndex(sScalarVariableIndex),
+	 lighting(sLighting),
+	 #ifdef VISUALIZATION_USE_SHADERS
+	 shader(0),
+	 #endif
+	 surface(pipe)
+	{
+	#ifdef VISUALIZATION_USE_SHADERS
+	if(lighting)
+		{
+		/* Acquire the shader: */
+		shader=TwoSided1DTexturedSurfaceShader::acquireShader();
+		}
+	#endif
+	}
+
+template <class DataSetWrapperParam>
+inline
+ColoredIsosurface<DataSetWrapperParam>::~ColoredIsosurface(
+	void)
+	{
+	#ifdef VISUALIZATION_USE_SHADERS
+	if(lighting)
+		{
+		/* Release the shader: */
+		TwoSided1DTexturedSurfaceShader::releaseShader(shader);
+		}
+	#endif
+	}
+
+template <class DataSetWrapperParam>
+inline
+std::string
+ColoredIsosurface<DataSetWrapperParam>::getName(
+	void) const
+	{
+	return "Colored Isosurface";
+	}
+
+template <class DataSetWrapperParam>
+inline
+size_t
+ColoredIsosurface<DataSetWrapperParam>::getSize(
+	void) const
+	{
+	return surface.getNumTriangles();
+	}
+
+template <class DataSetWrapperParam>
+inline
+void
+ColoredIsosurface<DataSetWrapperParam>::glRenderAction(
+	GLRenderState& renderState) const
+	{
+	/* Set up OpenGL state for colored isosurface rendering: */
+	renderState.disableCulling();
+	if(lighting)
+		{
+		#ifdef VISUALIZATION_USE_SHADERS
+		if(shader!=0)
+			{
+			/* Enable the shader: */
+			shader->set(0,renderState.getContextData());
+			}
+		else
+		#endif
+			{
+			renderState.setLighting(true);
+			renderState.setTwoSidedLighting(true);
+			renderState.disableColorMaterial();
+			renderState.setTextureMode(GL_MODULATE);
+			renderState.setSeparateSpecularColor(true);
+			}
+		glMaterialAmbientAndDiffuse(GLMaterialEnums::FRONT_AND_BACK,GLColor<GLfloat,4>(1.0f,1.0f,1.0f));
+		glMaterialSpecular(GLMaterialEnums::FRONT_AND_BACK,GLColor<GLfloat,4>(0.6f,0.6f,0.6f));
+		glMaterialShininess(GLMaterialEnums::FRONT_AND_BACK,25.0f);
+		}
+	else
+		{
+		renderState.setLighting(false);
+		renderState.setTextureMode(GL_REPLACE);
+		}
+	variableManager->bindColorMap(scalarVariableIndex,renderState);
+	
+	/* Render the surface representation: */
+	surface.glRenderAction(renderState.getContextData());
+	
+	/* Reset OpenGL state: */
+	#ifdef VISUALIZATION_USE_SHADERS
+	if(lighting&&shader!=0)
+		{
+		/* Disable the shader: */
+		shader->reset(renderState.getContextData());
+		}
+	#endif
+	}
+
+}
+
+}

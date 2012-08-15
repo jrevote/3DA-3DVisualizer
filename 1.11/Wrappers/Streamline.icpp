@@ -1,0 +1,99 @@
+/***********************************************************************
+Streamline - Wrapper class for streamlines as visualization elements.
+Part of the wrapper layer of the templatized visualization
+components.
+Copyright (c) 2006-2012 Oliver Kreylos
+
+This file is part of the 3D Data Visualizer (Visualizer).
+
+The 3D Data Visualizer is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+The 3D Data Visualizer is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with the 3D Data Visualizer; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+***********************************************************************/
+
+#define VISUALIZATION_WRAPPERS_STREAMLINE_IMPLEMENTATION
+
+#include <Wrappers/Streamline.h>
+
+#include <GL/gl.h>
+
+#include <Abstract/VariableManager.h>
+
+#include <GLRenderState.h>
+
+namespace Visualization {
+
+namespace Wrappers {
+
+/***************************
+Methods of class Streamline:
+***************************/
+
+template <class DataSetWrapperParam>
+inline
+Streamline<DataSetWrapperParam>::Streamline(
+	Visualization::Abstract::VariableManager* sVariableManager,
+	Visualization::Abstract::Parameters* sParameters,
+	int sScalarVariableIndex,
+	Cluster::MulticastPipe* pipe)
+	:Visualization::Abstract::Element(sVariableManager,sParameters),
+	 scalarVariableIndex(sScalarVariableIndex),
+	 polyline(pipe)
+	{
+	}
+
+template <class DataSetWrapperParam>
+inline
+Streamline<DataSetWrapperParam>::~Streamline(
+	void)
+	{
+	}
+
+template <class DataSetWrapperParam>
+inline
+std::string
+Streamline<DataSetWrapperParam>::getName(
+	void) const
+	{
+	return "Streamline";
+	}
+
+template <class DataSetWrapperParam>
+inline
+size_t
+Streamline<DataSetWrapperParam>::getSize(
+	void) const
+	{
+	return polyline.getNumVertices();
+	}
+
+template <class DataSetWrapperParam>
+inline
+void
+Streamline<DataSetWrapperParam>::glRenderAction(
+	GLRenderState& renderState) const
+	{
+	/* Set up OpenGL state for streamline rendering: */
+	renderState.setLineWidth(1.0f);
+	renderState.disableCulling();
+	renderState.setLighting(false);
+	variableManager->bindColorMap(scalarVariableIndex,renderState);
+	renderState.setTextureMode(GL_REPLACE);
+	
+	/* Render the streamline representation: */
+	polyline.glRenderAction(renderState.getContextData());
+	}
+
+}
+
+}

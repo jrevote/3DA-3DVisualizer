@@ -25,8 +25,10 @@
 # matches the default Vrui installation; if Vrui's installation
 # directory was changed during Vrui's installation, the directory below
 # must be adapted.
-#VRUI_MAKEDIR := $(HOME)/Vrui-2.4/share/make
-VRUI_MAKEDIR := /Users/jrevote/Documents/Builds/Vrui/2.4-004/share/make
+VRUI_MAKEDIR := $(HOME)/Vrui-2.5/share/make
+ifdef DEBUG
+  VRUI_MAKEDIR := $(VRUI_MAKEDIR)/debug
+endif
 
 # Base installation directory for 3D Visualizer and its module
 # plug-ins. The module plug-ins cannot be moved from this location
@@ -37,8 +39,7 @@ VRUI_MAKEDIR := /Users/jrevote/Documents/Builds/Vrui/2.4-004/share/make
 # directories underneath the given base directory, respectively.
 # Important note: Do not use ~ as an abbreviation for the user's home
 # directory here; use $(HOME) instead.
-#INSTALLDIR := $(shell pwd)
-INSTALLDIR := /Users/jrevote/Documents/Builds/3DVisualizer/1.11
+INSTALLDIR := $(shell pwd)
 
 # Flag whether to use GLSL shaders instead of fixed OpenGL functionality
 # for some visualization algorithms, especially volume rendering. This
@@ -104,7 +105,7 @@ PACKAGEROOT := $(shell pwd)
 # subsequent release versions of 3D Visualizer from clobbering each
 # other. The value should be identical to the major.minor version
 # number found in VERSION in the root package directory.
-VERSION = 1.11
+VERSION = 1.12
 
 # Set up resource directories: */
 PLUGINSDIREXT = 3DVisualizer-$(VERSION)
@@ -339,10 +340,10 @@ endif
 $(call MODULENAME,%): $(OBJDIR)/pic/Concrete/%.o
 	@mkdir -p $(PLUGINDESTDIR)
 ifdef SHOWCOMMAND
-	$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $^ $(LINKDIRFLAGS) $(LINKLIBFLAGS)
+	$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $(filter %.o,$^) $(LINKDIRFLAGS) $(LINKLIBFLAGS)
 else
 	@echo Linking $@...
-	@$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $^ $(LINKDIRFLAGS) $(LINKLIBFLAGS)
+	@$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $(filter %.o,$^) $(LINKDIRFLAGS) $(LINKLIBFLAGS)
 endif
 
 # Dependencies and special flags for visualization modules:
@@ -373,10 +374,10 @@ $(call COLLABORATIONPLUGINNAME,%): PACKAGES += MYCOLLABORATIONSERVER
 $(call COLLABORATIONPLUGINNAME,%): $(OBJDIR)/pic/%.o
 	@mkdir -p $(COLLABORATIONPLUGINDESTDIR)
 ifdef SHOWCOMMAND
-	$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $^ $(LINKDIRFLAGS) $(LINKLIBFLAGS)
+	$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $(filter %.o,$^) $(LINKDIRFLAGS) $(LINKLIBFLAGS)
 else
 	@echo Linking $@...
-	@$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $^ $(LINKDIRFLAGS) $(LINKLIBFLAGS)
+	@$(CCOMP) $(PLUGINLINKFLAGS) -o $@ $(filter %.o,$^) $(LINKDIRFLAGS) $(LINKLIBFLAGS)
 endif
 
 $(call COLLABORATIONPLUGINNAME,SharedVisualizationServer): $(OBJDIR)/pic/SharedVisualizationProtocol.o \

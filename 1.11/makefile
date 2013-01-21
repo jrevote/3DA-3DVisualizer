@@ -67,7 +67,9 @@ MODULE_NAMES = SphericalASCIIFile \
                UnstructuredHexahedralTecplotASCIIFile \
                ImageStack \
                DicomImageStack \
-               MultiChannelImageStack
+               MultiChannelImageStack \
+               GocadVoxetFile \
+               UnderworldHDF5File
 
 # List of other available modules:
 # Add any of these to the MODULE_NAMES list to build them
@@ -76,7 +78,6 @@ UNSUPPORTED_MODULE_NAMES = AnalyzeFile \
                            ByteVolFile \
                            SCTFile \
                            GaleFEMVectorFile \
-                           GocadVoxetFile \
                            ConvectionFile \
                            ConvectionFileCartesian \
                            CSConvectionFile \
@@ -151,7 +152,7 @@ SHAREINSTALLDIR = $(INSTALLDIR)/$(RESOURCEDIR)
 # Specify additional compiler and linker flags
 ########################################################################
 
-CFLAGS += -Wall -pedantic
+CFLAGS += -Wall -Werror -Wno-long-long
 
 MODULENAME = $(PLUGINDESTDIR)/lib$(1).$(PLUGINFILEEXT)
 COLLABORATIONPLUGINNAME = $(COLLABORATIONPLUGINDESTDIR)/lib$(1).$(PLUGINFILEEXT)
